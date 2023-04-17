@@ -1,3 +1,5 @@
+const client = require("./index");
+
 async function addTagToMeal(mealId, tagId) {
   try {
     await client.connect();
@@ -50,15 +52,17 @@ async function getTagsByMeal(mealId) {
 
     const { rows } = await client.query(
       `
-      SELECT * FROM meal_tags
-      WHERE "mealId" = $1;
+      SELECT tags.*
+      FROM tags
+      JOIN meal_tags ON tags.id = meal_tags."tagId"
+      WHERE meal_tags."mealId" = $1;
       `,
       [mealId]
     );
     await client.release();
-    console.log(rows, "ROWS LOG");
     return rows;
   } catch (error) {
+    console.error("Error in getTagsByMeal:", error);
     throw error;
   }
 }

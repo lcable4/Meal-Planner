@@ -28,9 +28,7 @@ const {
   updateMeal,
   getAllMeals,
   getMealById,
-  //getMealsByHubLocation,
   deleteMeal,
-  //getMealsByTag,
   deactivateMeal,
 } = require("./meals");
 
@@ -264,7 +262,8 @@ async function createInitialMeals() {
           "Cook sliced chicken breast in a pan with ginger, garlic, soy sauce, and sesame oil. Add sliced vegetables like bell peppers, carrots, and snow peas and stir-fry until tender. Serve over brown rice.",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/fordFocus.png",
+        image: "",
+        tags: ["Asian"],
       },
       {
         name: "Teriyaki Salmon",
@@ -272,7 +271,8 @@ async function createInitialMeals() {
           "Brush salmon fillets with teriyaki sauce and bake in the oven until cooked through. Serve with steamed broccoli and brown rice.",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/toyotaCamry.png",
+        image: "",
+        tags: ["Asian"],
       },
       {
         name: "Vegetable Fried Rice",
@@ -280,7 +280,8 @@ async function createInitialMeals() {
           "Cook brown rice according to package instructions. In a pan, sauté chopped onion, garlic, and ginger until fragrant. Add diced carrots, bell peppers, and peas and stir-fry until cooked. Push the vegetables to the side and scramble an egg in the same pan. Add the cooked rice and mix everything together. Season with soy sauce and sesame oil.",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/hondaCivic.png",
+        image: "",
+        tags: ["Asian"],
       },
       {
         name: "Spicy Peanut Noodles",
@@ -288,7 +289,8 @@ async function createInitialMeals() {
           "Cook udon noodles according to package instructions. In a bowl, whisk together peanut butter, soy sauce, rice vinegar, sriracha, and honey. Add the cooked noodles and sliced scallions to the bowl and toss until coated. Serve with steamed broccoli or snap peas.",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/chevySilverado.png",
+        image: "",
+        tags: ["Asian"],
       },
       {
         name: "Miso Soup with Tofu and Vegetables",
@@ -296,52 +298,103 @@ async function createInitialMeals() {
           "In a pot, bring vegetable broth to a simmer. Add sliced mushrooms, diced tofu, and chopped bok choy. Whisk together miso paste and hot water and add to the pot. Simmer for a few minutes until everything is heated through. Serve hot.",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/fordF150.png",
+        image: "",
+        tags: ["Asian"],
       },
       {
         name: "Italian Dish",
         description: "dasdasdasdasdasdasdasd",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/ram1500.png",
+        image: "",
+        tags: ["Italian"],
       },
       {
         name: "Italian Dish",
         description: "dasdasdasdasdasdasdasd",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/jeepWrangler.png",
+        image: "",
+        tags: ["Italian"],
       },
       {
         name: "Italian Dish",
         description: "dasdasdasdasdasdasdasd",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/toyota4Runner.png",
+        image: "",
+        tags: ["Italian"],
       },
       {
         name: "Italian Dish",
         description: "dasdasdasdasdasdasdasd",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/chevyTahoe.png",
+        image: "",
+        tags: ["Italian"],
       },
       {
         name: "Italian Dish",
         description: "dasdasdasdasdasdasdasd",
         upvotes: 0,
         price: 5,
-        image: "./images/vehicles/teslaModelS.png",
+        image: "",
+        tags: ["Italian"],
+      },
+      {
+        name: "Indian Dish",
+        description: "dasdasdasdasdasdasdasd",
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Indian"],
       },
     ];
-    const meals = [];
+
+    const createdMeals = [];
 
     for (let i = 0; i < mealsToCreate.length; i++) {
-      meals.push(await createMeal(mealsToCreate[i]));
-    }
+      const meal = mealsToCreate[i];
+      const { name, description, upvotes, price, image, tags } = meal;
 
-    console.log("Meals created:");
-    console.log(meals);
+      const {
+        rows: [createdMeal],
+      } = await client.query(
+        `
+          INSERT INTO meals(name, description, upvotes, price, active, image)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING *;
+        `,
+        [name, description, upvotes, price, true, image]
+      );
+
+      for (let j = 0; j < tags.length; j++) {
+        const tagName = tags[j];
+        const {
+          rows: [tag],
+        } = await client.query(
+          `
+            SELECT *
+            FROM tags
+            WHERE name = $1;
+          `,
+          [tagName]
+        );
+
+        if (tag) {
+          console.log(tag, "TAG LOG");
+          await addTagToMeal(createdMeal.id, tag.id);
+        }
+      }
+      createdMeals.push(createdMeal);
+    }
+    console.log("meals created:");
+    for (let i = 0; i < createdMeals.length; i++) {
+      const meal = createdMeals[i];
+      console.log("Meal:", meal);
+      const tags = await getTagsByMeal(meal.id);
+      console.log("Tags:", tags);
+    }
     console.log("Finished creating meals!");
   } catch (error) {
     console.error("Error creating meals!");

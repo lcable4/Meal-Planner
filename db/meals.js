@@ -150,8 +150,6 @@ module.exports = {
   updateMeal,
   getAllMeals,
   getMealById,
-  //getMealsByHubLocation,
   deleteMeal,
-  //getMealsByTag,
   deactivateMeal,
 };
