@@ -13,6 +13,22 @@ const {
 const { createCart, getCartByUserId, updateCartStatus } = require("./cart");
 
 const {
+  createIngredient,
+  getAllIngredients,
+  getIngredientById,
+  updateIngredient,
+  deactivateIngredient,
+  deleteIngredient,
+} = require("./ingredients");
+
+const {
+  addIngredientToMeal,
+  removeIngredientFromMeal,
+  getIngredientsByMeal,
+  getMealsByIngredient,
+} = require("./meal-ingredients");
+
+const {
   createTag,
   updateTag,
   deactivateTag,
@@ -58,6 +74,8 @@ async function dropTables() {
         DROP TABLE IF EXISTS cart;
         DROP TABLE IF EXISTS guest_cart;
         DROP TABLE IF EXISTS meal_tags;
+        DROP TABLE IF EXISTS meal_ingredients;
+        DROP TABLE IF EXISTS ingredients;
         DROP TABLE IF EXISTS meals;
         DROP TABLE IF EXISTS tags;
         DROP TABLE IF EXISTS users;
@@ -116,6 +134,18 @@ async function createTables() {
           image VARCHAR(255)
         );
         
+          CREATE TABLE ingredients(
+            id SERIAL PRIMARY KEY UNIQUE,
+            name VARCHAR(255) NOT NULL,
+            quantity INTEGER,
+            unit VARCHAR(255)
+          );
+          
+          CREATE TABLE meal_ingredients(
+            meal_id INTEGER REFERENCES meals(id),
+            ingredient_id INTEGER REFERENCES ingredients(id),
+            quantity INTEGER
+          );
         CREATE TABLE tags(
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) UNIQUE NOT NULL,
@@ -402,6 +432,152 @@ async function createInitialMeals() {
   }
 }
 
+async function createInitialIngredients() {
+  console.log("Starting to create ingredients...");
+  try {
+    const ingredientsToCreate = [
+      {
+        name: "Chicken Breast",
+      },
+      {
+        name: "Chicken Thighs",
+      },
+      {
+        name: "Carrots",
+      },
+      {
+        name: "Beef",
+      },
+      {
+        name: "Bacon",
+      },
+      {
+        name: "Potatoes",
+      },
+      {
+        name: "Onions",
+      },
+      {
+        name: "Bell Pepper",
+      },
+      {
+        name: "Green Chiles",
+      },
+      {
+        name: "Spinach",
+      },
+      {
+        name: "Eggs",
+      },
+      {
+        name: "Sea Salt",
+      },
+      {
+        name: "Pepper",
+      },
+      {
+        name: "Avocado",
+      },
+      {
+        name: "Water",
+      },
+      {
+        name: "Ginger",
+      },
+      {
+        name: "Orange Juice",
+      },
+      {
+        name: "Lemon Juice",
+      },
+      {
+        name: "Lime Juice",
+      },
+      {
+        name: "Baking Soda",
+      },
+      {
+        name: "Maple Syrup",
+      },
+      {
+        name: "Honey",
+      },
+      {
+        name: "Coffee",
+      },
+      {
+        name: "Egg Yolks",
+      },
+      {
+        name: "Butter",
+      },
+      {
+        name: "Sugar",
+      },
+      {
+        name: "Cream",
+      },
+      {
+        name: "Cottage Cheese",
+      },
+      {
+        name: "Strawberries",
+      },
+      {
+        name: "Olive Oil",
+      },
+      {
+        name: "Lemon Zest",
+      },
+      {
+        name: "Garlic Powder",
+      },
+      {
+        name: "Lemon",
+      },
+      {
+        name: "Parsley",
+      },
+      {
+        name: "Asparagus",
+      },
+      {
+        name: "Grated Parmesan",
+      },
+    ];
+    const createdIngredients = [];
+
+    for (let i = 0; i < ingredientsToCreate.length; i++) {
+      const ingredient = ingredientsToCreate[i];
+      const { name } = ingredient;
+
+      const {
+        rows: [createdIngredient],
+      } = await client.query(
+        `
+          INSERT INTO ingredients(name)
+          VALUES ($1)
+          RETURNING *;
+        `,
+        [name]
+      );
+
+      createdIngredients.push(createdIngredient);
+    }
+    console.log("ingredients created:");
+    for (let i = 0; i < createdIngredients.length; i++) {
+      const ingredient = createdIngredients[i];
+      console.log("ingredient:", ingredient);
+      const tags = await getIngredientsByMeal(1);
+      console.log("Ingredients:", tags);
+    }
+    console.log("Finished creating ingredients!");
+  } catch (error) {
+    console.error("Error creating ingredients!");
+    throw error;
+  }
+}
+
 async function rebuildDB() {
   await dropTables();
   await createTables();
@@ -410,5 +586,6 @@ async function rebuildDB() {
   await createInitialTags();
   await createInitialCart();
   await createInitialMeals();
+  await createInitialIngredients();
 }
 rebuildDB();

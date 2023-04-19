@@ -10,10 +10,12 @@ const {
 
 // Get /api/meals/:id
 mealsRouter.get("/:id", async (req, res) => {
+  console.log(req, "REQ LOG");
   const { id } = req.params;
   const result = await getMealById(id);
   res.send(result);
 });
+
 // Get /api/meals
 mealsRouter.get("/", async (req, res) => {
   const result = await getAllMeals();

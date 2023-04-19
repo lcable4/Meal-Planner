@@ -42,28 +42,28 @@ router.get("/", (req, res) => {
 });
 
 const userRouter = require("./users");
-//const tagsRouter = require("./tags");
+const tagsRouter = require("./tags");
 
 router.use("/users", userRouter);
-//router.use("/tags", tagsRouter);
+router.use("/tags", tagsRouter);
 
 //const inventoryRouter = require("./inventory");
 //router.use("/inventory", inventoryRouter);
 
-//const mealsRouter = require("./meals");
-//router.use("/meals", mealsRouter);
+const mealsRouter = require("./meals");
+router.use("/meals", mealsRouter);
 
-//const mealsTagsRouter = require("./meal-tags");
-//router.use("/meal-tags", mealsTagsRouter);
+const mealsTagsRouter = require("./meal-tags");
+router.use("/meal-tags", mealsTagsRouter);
 
-//const cartRouter = require("./cart");
-//router.use("/cart", cartRouter);
+const cartRouter = require("./cart");
+router.use("/cart", cartRouter);
 
-//const adminRouter = require("./admin");
-//router.use("/admin", adminRouter);
+const adminRouter = require("./admin");
+router.use("/admin", adminRouter);
 
-//const guestRouter = require("./guests");
-//const { getGuestById } = require("../db/guests");
-//router.use("/guests", guestRouter);
+const guestRouter = require("./guests");
+const { getGuestById } = require("../db/guests");
+router.use("/guests", guestRouter);
 
 module.exports = router;
