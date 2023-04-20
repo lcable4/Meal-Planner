@@ -128,6 +128,7 @@ async function createTables() {
           id SERIAL PRIMARY KEY UNIQUE,
           name VARCHAR(255) NOT NULL,
           description TEXT NOT NULL,
+          ingredients TEXT NOT NULL,
           upvotes INTEGER,
           price INTEGER NOT NULL,
           active BOOLEAN DEFAULT TRUE,
@@ -136,9 +137,9 @@ async function createTables() {
         
           CREATE TABLE ingredients(
             id SERIAL PRIMARY KEY UNIQUE,
-            name VARCHAR(255) NOT NULL,
+            name TEXT NOT NULL,
             quantity INTEGER,
-            unit VARCHAR(255)
+            unit TEXT
           );
           
           CREATE TABLE meal_ingredients(
@@ -248,7 +249,12 @@ async function createInitialTags() {
       "Mexican",
       "Italian",
       "Indian",
+      "SouthWestern",
       "Dessert",
+      "Breakfast",
+      "Brunch",
+      "Lunch",
+      "Dinner",
     ];
     const tags = [];
 
@@ -282,102 +288,258 @@ async function createInitialCart() {
   }
 }
 
-async function createInitialMeals() {
+async function createInitialIngredients() {
+  console.log("Starting to create ingredients...");
+  try {
+    const ingredientsToCreate = [
+      { name: "Chicken Breast", quantity: null, unit: null },
+      { name: "Salmon", quantity: null, unit: null },
+      { name: "Garlic", quantity: null, unit: null },
+      {
+        name: "Beef",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Bacon",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Potatoes",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Onions",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Bell Pepper",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Green Chiles",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Spinach",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Eggs",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Sea Salt",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Pepper",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Avocado",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Water",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Ginger",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Orange Juice",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Lemon Juice",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Lime Juice",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Baking Soda",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Maple Syrup",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Honey",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Coffee",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Egg Yolks",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Butter",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Sugar",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Cream",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Cottage Cheese",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Strawberries",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Olive Oil",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Lemon Zest",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Garlic Powder",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Lemon",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Parsley",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Asparagus",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Grated Parmesan",
+        quantity: null,
+        unit: null,
+      },
+    ];
+    const createdIngredients = [];
+
+    for (let i = 0; i < ingredientsToCreate.length; i++) {
+      const ingredient = ingredientsToCreate[i];
+      const { name, quantity, unit } = ingredient;
+
+      const {
+        rows: [createdIngredient],
+      } = await client.query(
+        `
+          INSERT INTO ingredients(name, quantity, unit)
+          VALUES ($1, $2, $3)
+          RETURNING *;
+        `,
+        [name, quantity, unit]
+      );
+
+      createdIngredients.push(createdIngredient);
+      console.log("ingredient:", createdIngredient);
+    }
+    console.log("ingredients created:", createdIngredients);
+    console.log("Finished creating ingredients!");
+    return createdIngredients;
+  } catch (error) {
+    console.error("Error creating ingredients!");
+    throw error;
+  }
+}
+async function createInitialMeals(ingredients) {
   console.log("Starting to create meals...");
+  console.log(ingredients, "INGREDIENTS LOG");
   try {
     const mealsToCreate = [
       {
         name: "Stir-Fried Ginger Chicken with Vegetables",
         description:
           "Cook sliced chicken breast in a pan with ginger, garlic, soy sauce, and sesame oil. Add sliced vegetables like bell peppers, carrots, and snow peas and stir-fry until tender. Serve over brown rice.",
+        ingredients: [
+          { ingredient: ingredients[0], quantity: 1 },
+          { ingredient: ingredients[2], quantity: 2 },
+        ],
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Asian"],
+        tags: ["Asian", "Dinner", "Lunch"],
       },
       {
         name: "Teriyaki Salmon",
         description:
           "Brush salmon fillets with teriyaki sauce and bake in the oven until cooked through. Serve with steamed broccoli and brown rice.",
+        ingredients: [
+          { ingredient: ingredients[1], quantity: 2 },
+          { ingredient: ingredients[2], quantity: 1 },
+        ],
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Asian"],
+        tags: ["Asian", "Dinner", "Lunch"],
       },
       {
-        name: "Vegetable Fried Rice",
+        name: "Southwest Scramble",
         description:
-          "Cook brown rice according to package instructions. In a pan, sauté chopped onion, garlic, and ginger until fragrant. Add diced carrots, bell peppers, and peas and stir-fry until cooked. Push the vegetables to the side and scramble an egg in the same pan. Add the cooked rice and mix everything together. Season with soy sauce and sesame oil.",
+          "A delicious and hearty breakfast scramble with potatoes, bacon, veggies, and eggs. Serve with avocado on top.",
+        ingredients: [
+          { ingredient: ingredients[5], quantity: 1 },
+          { ingredient: ingredients[6], quantity: 1 },
+          { ingredient: ingredients[7], quantity: 2 },
+          { ingredient: ingredients[8], quantity: 0 },
+          { ingredient: ingredients[9], quantity: 0 },
+          { ingredient: ingredients[10], quantity: 0 },
+          { ingredient: ingredients[11], quantity: 0 },
+          { ingredient: ingredients[12], quantity: 0 },
+          { ingredient: ingredients[13], quantity: 0 },
+          { ingredient: ingredients[14], quantity: 0 },
+        ],
         upvotes: 0,
-        price: 5,
+        price: 6,
         image: "",
-        tags: ["Asian"],
-      },
-      {
-        name: "Spicy Peanut Noodles",
-        description:
-          "Cook udon noodles according to package instructions. In a bowl, whisk together peanut butter, soy sauce, rice vinegar, sriracha, and honey. Add the cooked noodles and sliced scallions to the bowl and toss until coated. Serve with steamed broccoli or snap peas.",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Asian"],
-      },
-      {
-        name: "Miso Soup with Tofu and Vegetables",
-        description:
-          "In a pot, bring vegetable broth to a simmer. Add sliced mushrooms, diced tofu, and chopped bok choy. Whisk together miso paste and hot water and add to the pot. Simmer for a few minutes until everything is heated through. Serve hot.",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Asian"],
-      },
-      {
-        name: "Italian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Italian"],
-      },
-      {
-        name: "Italian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Italian"],
-      },
-      {
-        name: "Italian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Italian"],
-      },
-      {
-        name: "Italian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Italian"],
-      },
-      {
-        name: "Italian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Italian"],
-      },
-      {
-        name: "Indian Dish",
-        description: "dasdasdasdasdasdasdasd",
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Indian"],
+        tags: ["Breakfast", "Brunch", "Southwestern"],
       },
     ];
 
@@ -391,12 +553,30 @@ async function createInitialMeals() {
         rows: [createdMeal],
       } = await client.query(
         `
-          INSERT INTO meals(name, description, upvotes, price, active, image)
-          VALUES ($1, $2, $3, $4, $5, $6)
+          INSERT INTO meals(name, description, ingredients, upvotes, price, active, image)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING *;
         `,
-        [name, description, upvotes, price, true, image]
+        [name, description, ingredients, upvotes, price, true, image]
       );
+
+      const createdIngredients = [];
+
+      for (let j = 0; j < meal.ingredients.length; j++) {
+        const { ingredient, quantity } = meal.ingredients[j];
+        const {
+          rows: [createdMealIngredient],
+        } = await client.query(
+          `
+            INSERT INTO meal_ingredients(meal_id, ingredient_id, quantity)
+            VALUES ($1, $2, $3)
+            RETURNING *;
+          `,
+          [createdMeal.id, ingredient.id, quantity]
+        );
+
+        createdIngredients.push(ingredient);
+      }
 
       for (let j = 0; j < tags.length; j++) {
         const tagName = tags[j];
@@ -416,8 +596,13 @@ async function createInitialMeals() {
           await addTagToMeal(createdMeal.id, tag.id);
         }
       }
-      createdMeals.push(createdMeal);
+
+      createdMeals.push({
+        ...createdMeal,
+        ingredients: createdIngredients,
+      });
     }
+
     console.log("meals created:");
     for (let i = 0; i < createdMeals.length; i++) {
       const meal = createdMeals[i];
@@ -432,152 +617,6 @@ async function createInitialMeals() {
   }
 }
 
-async function createInitialIngredients() {
-  console.log("Starting to create ingredients...");
-  try {
-    const ingredientsToCreate = [
-      {
-        name: "Chicken Breast",
-      },
-      {
-        name: "Chicken Thighs",
-      },
-      {
-        name: "Carrots",
-      },
-      {
-        name: "Beef",
-      },
-      {
-        name: "Bacon",
-      },
-      {
-        name: "Potatoes",
-      },
-      {
-        name: "Onions",
-      },
-      {
-        name: "Bell Pepper",
-      },
-      {
-        name: "Green Chiles",
-      },
-      {
-        name: "Spinach",
-      },
-      {
-        name: "Eggs",
-      },
-      {
-        name: "Sea Salt",
-      },
-      {
-        name: "Pepper",
-      },
-      {
-        name: "Avocado",
-      },
-      {
-        name: "Water",
-      },
-      {
-        name: "Ginger",
-      },
-      {
-        name: "Orange Juice",
-      },
-      {
-        name: "Lemon Juice",
-      },
-      {
-        name: "Lime Juice",
-      },
-      {
-        name: "Baking Soda",
-      },
-      {
-        name: "Maple Syrup",
-      },
-      {
-        name: "Honey",
-      },
-      {
-        name: "Coffee",
-      },
-      {
-        name: "Egg Yolks",
-      },
-      {
-        name: "Butter",
-      },
-      {
-        name: "Sugar",
-      },
-      {
-        name: "Cream",
-      },
-      {
-        name: "Cottage Cheese",
-      },
-      {
-        name: "Strawberries",
-      },
-      {
-        name: "Olive Oil",
-      },
-      {
-        name: "Lemon Zest",
-      },
-      {
-        name: "Garlic Powder",
-      },
-      {
-        name: "Lemon",
-      },
-      {
-        name: "Parsley",
-      },
-      {
-        name: "Asparagus",
-      },
-      {
-        name: "Grated Parmesan",
-      },
-    ];
-    const createdIngredients = [];
-
-    for (let i = 0; i < ingredientsToCreate.length; i++) {
-      const ingredient = ingredientsToCreate[i];
-      const { name } = ingredient;
-
-      const {
-        rows: [createdIngredient],
-      } = await client.query(
-        `
-          INSERT INTO ingredients(name)
-          VALUES ($1)
-          RETURNING *;
-        `,
-        [name]
-      );
-
-      createdIngredients.push(createdIngredient);
-    }
-    console.log("ingredients created:");
-    for (let i = 0; i < createdIngredients.length; i++) {
-      const ingredient = createdIngredients[i];
-      console.log("ingredient:", ingredient);
-      const tags = await getIngredientsByMeal(1);
-      console.log("Ingredients:", tags);
-    }
-    console.log("Finished creating ingredients!");
-  } catch (error) {
-    console.error("Error creating ingredients!");
-    throw error;
-  }
-}
-
 async function rebuildDB() {
   await dropTables();
   await createTables();
@@ -585,7 +624,8 @@ async function rebuildDB() {
   await createAdminUsers();
   await createInitialTags();
   await createInitialCart();
-  await createInitialMeals();
-  await createInitialIngredients();
+  const ingredients = await createInitialIngredients();
+  console.log(ingredients, "INGREDIENTS LOG1");
+  await createInitialMeals(ingredients);
 }
 rebuildDB();
