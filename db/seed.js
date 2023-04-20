@@ -460,6 +460,31 @@ async function createInitialIngredients() {
         quantity: null,
         unit: null,
       },
+      {
+        name: "Broccoli",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Brown Rice",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Soy Sauce",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Ginger",
+        quantity: null,
+        unit: null,
+      },
+      {
+        name: "Sesame Seeds",
+        quantity: null,
+        unit: null,
+      },
     ];
     const createdIngredients = [];
 
@@ -491,7 +516,7 @@ async function createInitialIngredients() {
 }
 async function createInitialMeals(ingredients) {
   console.log("Starting to create meals...");
-  console.log(ingredients, "INGREDIENTS LOG");
+
   try {
     const mealsToCreate = [
       {
@@ -499,8 +524,12 @@ async function createInitialMeals(ingredients) {
         description:
           "Cook sliced chicken breast in a pan with ginger, garlic, soy sauce, and sesame oil. Add sliced vegetables like bell peppers, carrots, and snow peas and stir-fry until tender. Serve over brown rice.",
         ingredients: [
-          { ingredient: ingredients[0], quantity: 1 },
-          { ingredient: ingredients[2], quantity: 2 },
+          { ingredient: "Chicken Breast", quantity: 1, unit: "lbs" },
+          { ingredient: "Ginger", quantity: 2, unit: "teaspoons" },
+          { ingredient: "Garlic", quantity: 2, unit: "teaspoons" },
+          { ingredient: "Soy Sauce", quantity: 2, unit: "cup" },
+          { ingredient: "Sesame Seeds", quantity: 2, unit: "teaspoons" },
+          { ingredient: "Bell Pepper", quantity: 2, unit: "cup" },
         ],
         upvotes: 0,
         price: 5,
@@ -512,8 +541,9 @@ async function createInitialMeals(ingredients) {
         description:
           "Brush salmon fillets with teriyaki sauce and bake in the oven until cooked through. Serve with steamed broccoli and brown rice.",
         ingredients: [
-          { ingredient: ingredients[1], quantity: 2 },
-          { ingredient: ingredients[2], quantity: 1 },
+          { ingredient: "Salmon", quantity: 2, unit: "lbs" },
+          { ingredient: "Garlic", quantity: 1, unit: "cloves" },
+          { ingredient: "Brown Rice", quantity: 1, unit: "cup" },
         ],
         upvotes: 0,
         price: 5,
@@ -525,16 +555,16 @@ async function createInitialMeals(ingredients) {
         description:
           "A delicious and hearty breakfast scramble with potatoes, bacon, veggies, and eggs. Serve with avocado on top.",
         ingredients: [
-          { ingredient: ingredients[5], quantity: 1 },
-          { ingredient: ingredients[6], quantity: 1 },
-          { ingredient: ingredients[7], quantity: 2 },
-          { ingredient: ingredients[8], quantity: 0 },
-          { ingredient: ingredients[9], quantity: 0 },
-          { ingredient: ingredients[10], quantity: 0 },
-          { ingredient: ingredients[11], quantity: 0 },
-          { ingredient: ingredients[12], quantity: 0 },
-          { ingredient: ingredients[13], quantity: 0 },
-          { ingredient: ingredients[14], quantity: 0 },
+          { ingredient: "Bacon", quantity: 1, unit: "strips" },
+          { ingredient: "Potatoes", quantity: 1, unit: "" },
+          { ingredient: "Onions", quantity: 2, unit: "cup" },
+          { ingredient: "Bell Pepper", quantity: 1, unit: "cup" },
+          { ingredient: "Green Chiles", quantity: 1, unit: "" },
+          { ingredient: "Spinach", quantity: 1, unit: "cup" },
+          { ingredient: "Eggs", quantity: 1, unit: "" },
+          { ingredient: "Sea Salt", quantity: 1, unit: "teaspoons" },
+          { ingredient: "Pepper", quantity: 1, unit: "teaspoons" },
+          { ingredient: "Avocado", quantity: 1, unit: "cup" },
         ],
         upvotes: 0,
         price: 6,
@@ -557,13 +587,15 @@ async function createInitialMeals(ingredients) {
           VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING *;
         `,
-        [name, description, ingredients, upvotes, price, true, image]
+        [name, description, meal.ingredients, upvotes, price, true, image]
       );
 
       const createdIngredients = [];
 
       for (let j = 0; j < meal.ingredients.length; j++) {
         const { ingredient, quantity } = meal.ingredients[j];
+        console.log(meal.ingredients[j], "/////////");
+        console.log("ingredient:", ingredient);
         const {
           rows: [createdMealIngredient],
         } = await client.query(
@@ -625,7 +657,6 @@ async function rebuildDB() {
   await createInitialTags();
   await createInitialCart();
   const ingredients = await createInitialIngredients();
-  console.log(ingredients, "INGREDIENTS LOG1");
   await createInitialMeals(ingredients);
 }
 rebuildDB();
