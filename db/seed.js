@@ -64,6 +64,14 @@ const {
   clearGuestCart,
 } = require("./cart-items");
 
+const {
+  createMealPlan,
+  addMealToPlan,
+  getMealPlan,
+  getMealPlanByUser,
+  removeMealFromPlan,
+} = require("./meal-plans");
+
 async function dropTables() {
   try {
     console.log("Starting to drop tables...");
@@ -73,11 +81,13 @@ async function dropTables() {
         DROP TABLE IF EXISTS cart_items;
         DROP TABLE IF EXISTS cart;
         DROP TABLE IF EXISTS guest_cart;
+        DROP TABLE IF EXISTS meal_plan_ingredients;
+        DROP TABLE IF EXISTS meal_plans;
         DROP TABLE IF EXISTS meal_tags;
-        DROP TABLE IF EXISTS meal_ingredients;
-        DROP TABLE IF EXISTS ingredients;
-        DROP TABLE IF EXISTS meals;
         DROP TABLE IF EXISTS tags;
+        DROP TABLE IF EXISTS meal_ingredients;
+        DROP TABLE IF EXISTS meals;
+        DROP TABLE IF EXISTS ingredients;
         DROP TABLE IF EXISTS users;
         DROP TABLE IF EXISTS guests;
         DROP TABLE IF EXISTS admins;
@@ -159,7 +169,20 @@ async function createTables() {
           "tagId" INTEGER REFERENCES tags(id),
           UNIQUE("mealId", "tagId")
         );
+        CREATE TABLE meal_plans (
+          id SERIAL PRIMARY KEY,
+          meal_id INTEGER REFERENCES meals(id) ON DELETE CASCADE,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          date DATE NOT NULL,
+          UNIQUE(meal_id, user_id, date)
+        );
         
+        CREATE TABLE meal_plan_ingredients (
+          meal_plan_id INTEGER REFERENCES meal_plans(id),
+          ingredient_id INTEGER REFERENCES ingredients(id),
+          quantity INTEGER,
+          PRIMARY KEY(meal_plan_id, ingredient_id)
+        );
         CREATE TABLE cart(
           id SERIAL PRIMARY KEY,
           "userId" INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -248,8 +271,8 @@ async function createInitialTags() {
       "Asian",
       "Mexican",
       "Italian",
-      "Indian",
-      "SouthWestern",
+      "Gluten Free",
+      "South Western",
       "Dessert",
       "Breakfast",
       "Brunch",
@@ -649,6 +672,47 @@ async function createInitialMeals(ingredients) {
   }
 }
 
+async function createInitialMealPlan() {
+  try {
+    await client.connect();
+
+    // Set the meal plan date
+    const date = new Date("2023-04-25");
+
+    // Create a new meal plan for user with ID 1
+    const {
+      rows: [mealPlan],
+    } = await client.query(
+      `
+        INSERT INTO meal_plans (meal_id, user_id, date)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `,
+      [1, 2, date.toISOString()]
+    );
+
+    // Add meals to the meal plan
+    const mealIds = [1, 2, 3]; // Example meal IDs
+    for (const mealId of mealIds) {
+      await client.query(
+        `
+          INSERT INTO meal_plans (meal_id, user_id, date)
+          VALUES ($1, $2, $3);
+        `,
+        [mealId, 1, date.toISOString()]
+      );
+    }
+
+    await client.release();
+    console.log("Meal Plan created:", mealPlan);
+    console.log("Finished creating meal plan!");
+    return mealPlan;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error creating initial meal plan");
+  }
+}
+
 async function rebuildDB() {
   await dropTables();
   await createTables();
@@ -658,5 +722,7 @@ async function rebuildDB() {
   await createInitialCart();
   const ingredients = await createInitialIngredients();
   await createInitialMeals(ingredients);
+  await createInitialMealPlan();
 }
+
 rebuildDB();
