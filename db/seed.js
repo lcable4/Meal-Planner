@@ -147,9 +147,9 @@ async function createTables() {
         
           CREATE TABLE ingredients(
             id SERIAL PRIMARY KEY UNIQUE,
-            name TEXT NOT NULL,
+            name VARCHAR(255) UNIQUE NOT NULL,
             quantity INTEGER,
-            unit TEXT
+            unit VARCHAR(255)
           );
           
           CREATE TABLE meal_ingredients(
@@ -315,205 +315,54 @@ async function createInitialIngredients() {
   console.log("Starting to create ingredients...");
   try {
     const ingredientsToCreate = [
-      { name: "Chicken Breast", quantity: null, unit: null },
-      { name: "Salmon", quantity: null, unit: null },
-      { name: "Garlic", quantity: null, unit: null },
-      {
-        name: "Beef",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Bacon",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Potatoes",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Onions",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Bell Pepper",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Green Chiles",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Spinach",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Eggs",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Sea Salt",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Pepper",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Avocado",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Water",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Ginger",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Orange Juice",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Lemon Juice",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Lime Juice",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Baking Soda",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Maple Syrup",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Honey",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Coffee",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Egg Yolks",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Butter",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Sugar",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Cream",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Cottage Cheese",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Strawberries",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Olive Oil",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Lemon Zest",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Garlic Powder",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Lemon",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Parsley",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Asparagus",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Grated Parmesan",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Broccoli",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Brown Rice",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Soy Sauce",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Ginger",
-        quantity: null,
-        unit: null,
-      },
-      {
-        name: "Sesame Seeds",
-        quantity: null,
-        unit: null,
-      },
+      { name: "Chicken Breast", quantity: 1, unit: "pound" },
+      { name: "Salmon", quantity: 1, unit: "pound" },
+      { name: "Garlic", quantity: 2, unit: "cloves" },
+      { name: "Beef", quantity: 1, unit: "pound" },
+      { name: "Bacon", quantity: 8, unit: "slices" },
+      { name: "Potatoes", quantity: 2, unit: "lbs" },
+      { name: "Onions", quantity: 1, unit: "medium" },
+      { name: "Bell Pepper", quantity: 1, unit: "medium" },
+      { name: "Green Chiles", quantity: 1, unit: "can" },
+      { name: "Spinach", quantity: 1, unit: "cup" },
+      { name: "Eggs", quantity: 4, unit: "" },
+      { name: "Sea Salt", quantity: 1, unit: "tsp" },
+      { name: "Pepper", quantity: 1, unit: "tsp" },
+      { name: "Avocado", quantity: 1, unit: "" },
+      { name: "Water", quantity: 1, unit: "cup" },
+      { name: "Ginger", quantity: 1, unit: "tbsp" },
+      { name: "Orange Juice", quantity: 1, unit: "cup" },
+      { name: "Lemon Juice", quantity: 1, unit: "tbsp" },
+      { name: "Lime Juice", quantity: 1, unit: "tbsp" },
+      { name: "Baking Soda", quantity: 1, unit: "tsp" },
+      { name: "Maple Syrup", quantity: 2, unit: "tbsp" },
+      { name: "Honey", quantity: 1, unit: "tbsp" },
+      { name: "Coffee", quantity: 1, unit: "cup" },
+      { name: "Egg Yolks", quantity: 4, unit: "" },
+      { name: "Butter", quantity: 1, unit: "cup" },
+      { name: "Sugar", quantity: 1, unit: "cup" },
+      { name: "Cream", quantity: 1, unit: "cup" },
+      { name: "Cottage Cheese", quantity: 1, unit: "cup" },
+      { name: "Strawberries", quantity: 1, unit: "cup" },
+      { name: "Olive Oil", quantity: 2, unit: "tbsp" },
+      { name: "Lemon Zest", quantity: 1, unit: "tsp" },
+      { name: "Garlic Powder", quantity: 1, unit: "tsp" },
+      { name: "Lemon", quantity: 1, unit: "" },
+      { name: "Parsley", quantity: 1, unit: "tbsp" },
+      { name: "Asparagus", quantity: 1, unit: "lb" },
+      { name: "Grated Parmesan", quantity: 1, unit: "cup" },
+      { name: "Broccoli", quantity: 1, unit: "lb" },
+      { name: "Brown Rice", quantity: 1, unit: "cup" },
+      { name: "Soy Sauce", quantity: 1, unit: "tbsp" },
+      { name: "Sesame Seeds", quantity: 1, unit: "tbsp" },
     ];
     const createdIngredients = [];
 
     for (let i = 0; i < ingredientsToCreate.length; i++) {
       const ingredient = ingredientsToCreate[i];
       const { name, quantity, unit } = ingredient;
+      const ingredientJSON = JSON.stringify(ingredient);
+      console.log(ingredientJSON, "JSON LOG");
 
       const {
         rows: [createdIngredient],
@@ -547,12 +396,10 @@ async function createInitialMeals(ingredients) {
         description:
           "Cook sliced chicken breast in a pan with ginger, garlic, soy sauce, and sesame oil. Add sliced vegetables like bell peppers, carrots, and snow peas and stir-fry until tender. Serve over brown rice.",
         ingredients: [
-          { ingredient: "Chicken Breast", quantity: 1, unit: "lbs" },
-          { ingredient: "Ginger", quantity: 2, unit: "teaspoons" },
-          { ingredient: "Garlic", quantity: 2, unit: "teaspoons" },
-          { ingredient: "Soy Sauce", quantity: 2, unit: "cup" },
-          { ingredient: "Sesame Seeds", quantity: 2, unit: "teaspoons" },
-          { ingredient: "Bell Pepper", quantity: 2, unit: "cup" },
+          { id: 1, name: "Chicken Breast", quantity: 1, unit: "pound" },
+          { id: 39, name: "Soy Sauce", quantity: 1, unit: "tbsp" },
+          { id: 40, name: "Sesame Seeds", quantity: 1, unit: "tbsp" },
+          { id: 8, name: "Bell Pepper", quantity: 1, unit: "medium" },
         ],
         upvotes: 0,
         price: 5,
@@ -564,9 +411,9 @@ async function createInitialMeals(ingredients) {
         description:
           "Brush salmon fillets with teriyaki sauce and bake in the oven until cooked through. Serve with steamed broccoli and brown rice.",
         ingredients: [
-          { ingredient: "Salmon", quantity: 2, unit: "lbs" },
-          { ingredient: "Garlic", quantity: 1, unit: "cloves" },
-          { ingredient: "Brown Rice", quantity: 1, unit: "cup" },
+          { id: 2, name: "Salmon", quantity: 1, unit: "pound" },
+          { id: 3, name: "Garlic", quantity: 2, unit: "cloves" },
+          { id: 38, name: "Brown Rice", quantity: 1, unit: "cup" },
         ],
         upvotes: 0,
         price: 5,
@@ -578,21 +425,21 @@ async function createInitialMeals(ingredients) {
         description:
           "A delicious and hearty breakfast scramble with potatoes, bacon, veggies, and eggs. Serve with avocado on top.",
         ingredients: [
-          { ingredient: "Bacon", quantity: 1, unit: "strips" },
-          { ingredient: "Potatoes", quantity: 1, unit: "" },
-          { ingredient: "Onions", quantity: 2, unit: "cup" },
-          { ingredient: "Bell Pepper", quantity: 1, unit: "cup" },
-          { ingredient: "Green Chiles", quantity: 1, unit: "" },
-          { ingredient: "Spinach", quantity: 1, unit: "cup" },
-          { ingredient: "Eggs", quantity: 1, unit: "" },
-          { ingredient: "Sea Salt", quantity: 1, unit: "teaspoons" },
-          { ingredient: "Pepper", quantity: 1, unit: "teaspoons" },
-          { ingredient: "Avocado", quantity: 1, unit: "cup" },
+          { id: 5, name: "Bacon", quantity: 8, unit: "slices" },
+          { id: 6, name: "Potatoes", quantity: 2, unit: "lbs" },
+          { id: 7, name: "Onions", quantity: 1, unit: "medium" },
+          { id: 8, name: "Bell Pepper", quantity: 1, unit: "medium" },
+          { id: 9, name: "Green Chiles", quantity: 1, unit: "can" },
+          { id: 10, name: "Spinach", quantity: 1, unit: "cup" },
+          { id: 11, name: "Eggs", quantity: 4, unit: "" },
+          { id: 12, name: "Sea Salt", quantity: 1, unit: "tsp" },
+          { id: 13, name: "Pepper", quantity: 1, unit: "tsp" },
+          { id: 14, name: "Avocado", quantity: 1, unit: "" },
         ],
         upvotes: 0,
         price: 6,
         image: "",
-        tags: ["Breakfast", "Brunch", "Southwestern"],
+        tags: ["Breakfast", "Brunch", "South Western"],
       },
     ];
 
@@ -616,9 +463,9 @@ async function createInitialMeals(ingredients) {
       const createdIngredients = [];
 
       for (let j = 0; j < meal.ingredients.length; j++) {
-        const { ingredient, quantity } = meal.ingredients[j];
+        const { id, quantity } = meal.ingredients[j];
         console.log(meal.ingredients[j], "/////////");
-        console.log("ingredient:", ingredient);
+        console.log("ingredient id:", id);
         const {
           rows: [createdMealIngredient],
         } = await client.query(
@@ -627,10 +474,10 @@ async function createInitialMeals(ingredients) {
             VALUES ($1, $2, $3)
             RETURNING *;
           `,
-          [createdMeal.id, ingredient.id, quantity]
+          [createdMeal.id, meal.ingredients[j].id, quantity]
         );
-
-        createdIngredients.push(ingredient);
+        console.log(createdMealIngredient, "CREATED MEAL INGREDIENT LOG");
+        createdIngredients.push(createdMealIngredient);
       }
 
       for (let j = 0; j < tags.length; j++) {
