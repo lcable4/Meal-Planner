@@ -83,6 +83,7 @@ async function dropTables() {
         DROP TABLE IF EXISTS guest_cart;
         DROP TABLE IF EXISTS meal_plan_ingredients;
         DROP TABLE IF EXISTS meal_plans;
+        DROP TABLE IF EXISTS monthly_meal_plans;
         DROP TABLE IF EXISTS meal_tags;
         DROP TABLE IF EXISTS tags;
         DROP TABLE IF EXISTS meal_ingredients;
@@ -173,8 +174,9 @@ async function createTables() {
           id SERIAL PRIMARY KEY,
           meal_id INTEGER REFERENCES meals(id) ON DELETE CASCADE,
           user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          month VARCHAR(7) NOT NULL,
           date DATE NOT NULL,
-          UNIQUE(meal_id, user_id, date)
+          UNIQUE(meal_id, user_id, month, date)
         );
         
         CREATE TABLE meal_plan_ingredients (
@@ -518,24 +520,25 @@ async function createInitialMeals(ingredients) {
     throw error;
   }
 }
-
 async function createInitialMealPlan() {
   try {
     await client.connect();
 
     // Set the meal plan date
     const date = new Date("2023-04-25");
+    // Get the month in the format 'YYYY-MM'
+    const month = date.toISOString().substring(0, 7);
 
     // Create a new meal plan for user with ID 1
     const {
       rows: [mealPlan],
     } = await client.query(
       `
-        INSERT INTO meal_plans (meal_id, user_id, date)
-        VALUES ($1, $2, $3)
+        INSERT INTO meal_plans (meal_id, user_id, date, month)
+        VALUES ($1, $2, $3, $4)
         RETURNING *;
       `,
-      [1, 2, date.toISOString()]
+      [1, 2, date.toISOString(), month]
     );
 
     // Add meals to the meal plan
@@ -543,10 +546,10 @@ async function createInitialMealPlan() {
     for (const mealId of mealIds) {
       await client.query(
         `
-          INSERT INTO meal_plans (meal_id, user_id, date)
-          VALUES ($1, $2, $3);
+          INSERT INTO meal_plans (meal_id, user_id, date, month)
+          VALUES ($1, $2, $3, $4);
         `,
-        [mealId, 1, date.toISOString()]
+        [mealId, 1, date.toISOString(), month]
       );
     }
 

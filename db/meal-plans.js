@@ -1,5 +1,32 @@
 const client = require("./index");
 
+async function getPlanByWeek(month) {
+  try {
+    await client.connect();
+
+    // Gets the meal plan for the week
+    const {
+      rows: [mealPlan],
+    } = await client.query(
+      `
+      SELECT meal_plans.*, meals.name, meals.description, meals.ingredients, meals.price, meals.image
+      FROM meal_plans
+      JOIN meals ON meal_plans.meal_id = meals.id
+      WHERE meal_plans.month = $1
+      AND date_trunc('week', meal_plans.date) = date_trunc('week', NOW())
+        `,
+      [month]
+    );
+
+    await client.release();
+
+    return mealPlan;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error getting weekly meal plan");
+  }
+}
+
 //creates a new meal plan for a user
 async function createMealPlan(userId) {
   try {
@@ -142,6 +169,7 @@ async function removeMealFromPlan(mealPlanId) {
 }
 
 module.exports = {
+  getPlanByWeek,
   createMealPlan,
   addMealToPlan,
   getMealPlan,
