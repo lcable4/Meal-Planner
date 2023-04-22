@@ -54,11 +54,26 @@ async function getAllMeals() {
   try {
     await client.connect();
     const { rows: meals } = await client.query(`
-        SELECT *
-        FROM meals;
+    SELECT meals.id, meals.name, meals.description, 
+    json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
+    FROM meals
+    JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
+    JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
+    GROUP BY meals.id;
+      `);
+
+    const { rows: tags } = await client.query(`
+      SELECT meals.id AS meal_id, tags.id, tags.name, tags.active
+      FROM meals
+      JOIN meal_tags ON meals.id = meal_tags."mealId"
+      JOIN tags ON meal_tags."tagId" = tags.id;
       `);
 
     await client.release();
+
+    meals.forEach((meal) => {
+      meal.tags = tags.filter((tag) => tag.meal_id === meal.id);
+    });
 
     return meals;
   } catch (e) {
