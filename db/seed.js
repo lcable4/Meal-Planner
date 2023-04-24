@@ -72,6 +72,16 @@ const {
   removeMealFromPlan,
 } = require("./meal-plans");
 
+function getWeekNumber(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const firstDayOfYear = new Date(year, 0, 1);
+  const pastDaysOfYear = day - firstDayOfYear.getDay() + 1;
+  const weekNumber = Math.ceil(pastDaysOfYear / 7);
+  return weekNumber;
+}
+
 async function dropTables() {
   try {
     console.log("Starting to drop tables...");
@@ -82,14 +92,14 @@ async function dropTables() {
         DROP TABLE IF EXISTS cart;
         DROP TABLE IF EXISTS guest_cart;
         DROP TABLE IF EXISTS meal_plan_ingredients;
-        DROP TABLE IF EXISTS meal_plans;
-        DROP TABLE IF EXISTS monthly_meal_plans;
+        DROP TABLE IF EXISTS meal_plans ;
+        DROP TABLE IF EXISTS monthly_plans;
         DROP TABLE IF EXISTS meal_tags;
         DROP TABLE IF EXISTS tags;
         DROP TABLE IF EXISTS meal_ingredients;
-        DROP TABLE IF EXISTS meals;
+        DROP TABLE IF EXISTS meals ;
         DROP TABLE IF EXISTS ingredients;
-        DROP TABLE IF EXISTS users;
+        DROP TABLE IF EXISTS users ;
         DROP TABLE IF EXISTS guests;
         DROP TABLE IF EXISTS admins;
         `);
@@ -143,7 +153,8 @@ async function createTables() {
           upvotes INTEGER,
           price INTEGER NOT NULL,
           active BOOLEAN DEFAULT TRUE,
-          image VARCHAR(255)
+          image VARCHAR(255),
+          UNIQUE(id, name, description)
         );
         
           CREATE TABLE ingredients(
@@ -170,20 +181,32 @@ async function createTables() {
           "tagId" INTEGER REFERENCES tags(id),
           UNIQUE("mealId", "tagId")
         );
+        
         CREATE TABLE meal_plans (
-          id SERIAL PRIMARY KEY,
-          meal_id INTEGER REFERENCES meals(id) ON DELETE CASCADE,
-          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-          month VARCHAR(7) NOT NULL,
-          date DATE NOT NULL,
-          UNIQUE(meal_id, user_id, month, date)
+        id SERIAL PRIMARY KEY,
+        meal_id INTEGER,
+        week_number INTEGER NOT NULL,
+        day_of_week VARCHAR(255) NOT NULL,
+        meal_name VARCHAR(255),
+        meal_description TEXT,
+        date DATE NOT NULL,
+        UNIQUE(meal_id, week_number, day_of_week, meal_name, meal_description, date),
+        FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
         );
         
         CREATE TABLE meal_plan_ingredients (
           meal_plan_id INTEGER REFERENCES meal_plans(id),
           ingredient_id INTEGER REFERENCES ingredients(id),
           quantity INTEGER,
+          unit VARCHAR(255),
           PRIMARY KEY(meal_plan_id, ingredient_id)
+        );
+        CREATE TABLE monthly_plans (
+          id SERIAL PRIMARY KEY,
+          month_number INTEGER NOT NULL,
+          week_number INTEGER NOT NULL,
+          year INTEGER NOT NULL,
+          UNIQUE(month_number, week_number, year)
         );
         CREATE TABLE cart(
           id SERIAL PRIMARY KEY,
@@ -280,6 +303,7 @@ async function createInitialTags() {
       "Brunch",
       "Lunch",
       "Dinner",
+      "Drinks",
     ];
     const tags = [];
 
@@ -342,10 +366,11 @@ async function createInitialIngredients() {
       { name: "Coffee", quantity: 1, unit: "cup" },
       { name: "Egg Yolks", quantity: 4, unit: "" },
       { name: "Butter", quantity: 1, unit: "cup" },
+      { name: "Strawberries", quantity: 1, unit: "cup" },
+      { name: "Whole Milk Cottage Cheese", quantity: 1, unit: "cup" },
       { name: "Sugar", quantity: 1, unit: "cup" },
       { name: "Cream", quantity: 1, unit: "cup" },
       { name: "Cottage Cheese", quantity: 1, unit: "cup" },
-      { name: "Strawberries", quantity: 1, unit: "cup" },
       { name: "Olive Oil", quantity: 2, unit: "tbsp" },
       { name: "Lemon Zest", quantity: 1, unit: "tsp" },
       { name: "Garlic Powder", quantity: 1, unit: "tsp" },
@@ -428,7 +453,7 @@ async function createInitialMeals(ingredients) {
           "A delicious and hearty breakfast scramble with potatoes, bacon, veggies, and eggs. Serve with avocado on top.",
         ingredients: [
           { id: 5, name: "Bacon", quantity: 8, unit: "slices" },
-          { id: 6, name: "Potatoes", quantity: 2, unit: "lbs" },
+          { id: 6, name: "Potatoes", quantity: 2, unit: "large" },
           { id: 7, name: "Onions", quantity: 1, unit: "medium" },
           { id: 8, name: "Bell Pepper", quantity: 1, unit: "medium" },
           { id: 9, name: "Green Chiles", quantity: 1, unit: "can" },
@@ -442,6 +467,61 @@ async function createInitialMeals(ingredients) {
         price: 6,
         image: "",
         tags: ["Breakfast", "Brunch", "South Western"],
+      },
+      {
+        name: "Homemade Electrolytes",
+        description:
+          "Add the water, orange juice, lemon juice, lime juice and ginger to a medium-sized saucepan. Place over a medium heat and bring to a simmer. Add the baking soda and salt to the pot. Stir to dissolve. Turn the heat down to medium-low and gently simmer for about 2 minutes. Remove from the heat and stir in 2 tablespoons maple syrup or honey until fully dissolved. Place a fine mesh strainer over a bowl and strain to filter out the solid ginger pieces and citrus seeds. Taste and sweeten with more maple/honey if needed. Serve hot or cold.",
+        ingredients: [
+          { id: 12, name: "Sea Salt", quantity: 1, unit: "tsp" },
+          { id: 16, name: "Ginger", quantity: 1, unit: "tbsp" },
+          { id: 17, name: "Orange Juice", quantity: 1, unit: "cup" },
+          { id: 18, name: "Lemon Juice", quantity: 1, unit: "tbsp" },
+          { id: 19, name: "Lime Juice", quantity: 1, unit: "tbsp" },
+          { id: 20, name: "Baking Soda", quantity: 1, unit: "tsp" },
+          { id: 21, name: "Maple Syrup", quantity: 2, unit: "tbsp" },
+          { id: 22, name: "Honey", quantity: 1, unit: "tbsp" },
+          { id: 15, name: "Water", quantity: 1, unit: "cup" },
+        ],
+        upvotes: 0,
+        price: 1,
+        image: "",
+        tags: ["Breakfast", "Brunch", "Gluten Free", "Drinks"],
+      },
+      {
+        name: "Buttery Egg Yolk Coffee",
+        description:
+          "Blend (or use immersion blender) coffee and egg yolks until fluffy. Add sugar, salt and butter to the blender. Pour into a mug with a splash of cream.",
+        ingredients: [
+          { id: 23, name: "Coffee", quantity: 1, unit: "cup" },
+          { id: 24, name: "Egg Yolks", quantity: 2, unit: "" },
+          { id: 25, name: "Butter", quantity: 1, unit: "tbsp" },
+          { id: 26, name: "Sugar", quantity: 1, unit: "tsp" },
+          { id: 27, name: "Cream", quantity: 1, unit: "splash" },
+          { id: 12, name: "Sea Salt", quantity: 1, unit: "pinch" },
+        ],
+        upvotes: 0,
+        price: 1,
+        image: "",
+        tags: ["Breakfast", "Brunch", "Gluten Free", "Drinks"],
+      },
+      {
+        name: "Protein Ice Cream",
+        description: "Blend until smooth and freeze",
+        ingredients: [
+          { id: 21, name: "Maple Syrup", quantity: 1, unit: "cup" },
+          {
+            id: 27,
+            name: "Whole Milk Cottage Cheese",
+            quantity: 1,
+            unit: "container",
+          },
+          { id: 26, name: "Strawberries", quantity: 4, unit: "cup" },
+        ],
+        upvotes: 0,
+        price: 2,
+        image: "",
+        tags: ["Gluten Free", "Dessert"],
       },
     ];
 
@@ -529,34 +609,35 @@ async function createInitialMealPlan() {
     // Get the month in the format 'YYYY-MM'
     const month = date.toISOString().substring(0, 7);
 
-    // Create a new meal plan for user with ID 1
-    const {
-      rows: [mealPlan],
-    } = await client.query(
+    // Add meals to the meal plan for each day from Monday to Friday
+    const mealIds = [1, 2, 3, 4, 5, 6]; // Example meal IDs
+    const daysOfWeek = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+
+    const weekNumber = getWeekNumber(date);
+
+    const { rows: mealPlans } = await client.query(
       `
-        INSERT INTO meal_plans (meal_id, user_id, date, month)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO meal_plans (week_number, day_of_week, meal_id, meal_name, meal_description, date)
+        SELECT $1, $2, meals.id, meals.name, meals.description, $3
+        FROM meals
+        WHERE meals.id IN (1, 2, 3, 4, 5, 6)
         RETURNING *;
       `,
-      [1, 2, date.toISOString(), month]
+      [weekNumber, daysOfWeek[0], date.toISOString()]
     );
 
-    // Add meals to the meal plan
-    const mealIds = [1, 2, 3]; // Example meal IDs
-    for (const mealId of mealIds) {
-      await client.query(
-        `
-          INSERT INTO meal_plans (meal_id, user_id, date, month)
-          VALUES ($1, $2, $3, $4);
-        `,
-        [mealId, 1, date.toISOString(), month]
-      );
-    }
+    console.log("Meal Plan created:", mealPlans);
 
     await client.release();
-    console.log("Meal Plan created:", mealPlan);
     console.log("Finished creating meal plan!");
-    return mealPlan;
   } catch (e) {
     console.error(e);
     throw new Error("Error creating initial meal plan");

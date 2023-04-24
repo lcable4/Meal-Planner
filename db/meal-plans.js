@@ -1,146 +1,113 @@
 const client = require("./index");
 
-async function getPlanByWeek(month) {
+// Get meal plan for the given week
+async function getPlanByWeek(weekNumber, year) {
   try {
     await client.connect();
-
-    // Gets the meal plan for the week
-    const {
-      rows: [mealPlan],
-    } = await client.query(
+    const { rows } = await client.query(
       `
-      SELECT meal_plans.*, meals.name, meals.description, meals.ingredients, meals.price, meals.image
-      FROM meal_plans
-      JOIN meals ON meal_plans.meal_id = meals.id
-      WHERE meal_plans.month = $1
-      AND date_trunc('week', meal_plans.date) = date_trunc('week', NOW())
-        `,
-      [month]
+        SELECT meal_plans.*, meals.name, meals.description, meals.ingredients, meals.price, meals.image
+        FROM meal_plans
+        JOIN meals ON meal_plans.meal_id = meals.id
+        WHERE meal_plans.week_number = $1 AND meal_plans.year = $2;
+      `,
+      [weekNumber, year]
     );
-
     await client.release();
-
-    return mealPlan;
+    return rows;
   } catch (e) {
     console.error(e);
     throw new Error("Error getting weekly meal plan");
   }
 }
 
-//creates a new meal plan for a user
-async function createMealPlan(userId) {
+// Create a new meal plan
+async function createMealPlan(
+  mealId,
+  weekNumber,
+  dayOfWeek,
+  mealName,
+  mealDescription,
+  date
+) {
   try {
     await client.connect();
-
-    // Insert a new meal plan for the specified user
-    const {
-      rows: [mealPlan],
-    } = await client.query(
+    const { rows } = await client.query(
       `
-          INSERT INTO meal_plans(user_id)
-          VALUES ($1)
-          RETURNING *;
-        `,
-      [userId]
+        INSERT INTO meal_plans(meal_id, week_number, day_of_week, meal_name, meal_description, date)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *;
+      `,
+      [mealId, weekNumber, dayOfWeek, mealName, mealDescription, date]
     );
-
     await client.release();
-
-    return mealPlan;
+    return rows[0];
   } catch (e) {
     console.error(e);
     throw new Error("Error creating meal plan");
   }
 }
 
-async function addMealToPlan(mealId, tagId, ingredientQuantities) {
+// Add a meal to a plan
+async function addMealToPlan(mealPlanId, mealId, tagId, ingredientQuantities) {
   try {
     await client.connect();
-
-    // First insert the meal and tag into the meal_plans table
-    const {
-      rows: [meal_plan],
-    } = await client.query(
+    const { rows } = await client.query(
       `
-          INSERT INTO meal_plans(meal_id, tag_id)
-          VALUES ($1, $2)
-          ON CONFLICT(meal_id, tag_id) DO UPDATE
-          SET meal_id = EXCLUDED.meal_id
-          RETURNING *;
-        `,
-      [mealId, tagId]
+        INSERT INTO meal_plans(id, meal_id, tag_id)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (id) DO UPDATE
+        SET meal_id = EXCLUDED.meal_id, tag_id = EXCLUDED.tag_id
+        RETURNING *;
+      `,
+      [mealPlanId, mealId, tagId]
     );
-
-    // Next, insert the ingredient quantities into the meal_plan_ingredients table
-    const values = ingredientQuantities.map((iq) => `($1, $2, $3)`).join(",");
+    const values = ingredientQuantities
+      .map((iq) => `($1, $2, $3, $4)`)
+      .join(",");
     const args = ingredientQuantities.reduce(
-      (acc, iq) => [...acc, meal_plan.id, iq.ingredientId, iq.quantity],
+      (acc, iq) => [...acc, mealPlanId, iq.ingredientId, iq.quantity, iq.unit],
       []
     );
     await client.query(
       `
-          INSERT INTO meal_plan_ingredients(meal_plan_id, ingredient_id, quantity)
-          VALUES ${values}
-          ON CONFLICT(meal_plan_id, ingredient_id) DO UPDATE
-          SET quantity = EXCLUDED.quantity;
-        `,
+        INSERT INTO meal_plan_ingredients(meal_plan_id, ingredient_id, quantity, unit)
+        VALUES ${values}
+        ON CONFLICT (meal_plan_id, ingredient_id) DO UPDATE
+        SET quantity = EXCLUDED.quantity, unit = EXCLUDED.unit;
+      `,
       args
     );
-
     await client.release();
-
-    return meal_plan;
+    return rows[0];
   } catch (e) {
     console.error(e);
     throw new Error("Error adding meal to your plan");
   }
 }
 
-//gets a meal plan that matches the id
+// Get a meal plan by its ID
 async function getMealPlan(mealPlanId) {
   try {
     await client.connect();
-
-    const {
-      rows: [meal_plan],
-    } = await client.query(
+    const { rows } = await client.query(
       `
-            SELECT meal_plans.id, meals.name AS meal_name, tags.name AS tag_name, meal_plan_ingredients.ingredient_id, ingredients.name AS ingredient_name, meal_plan_ingredients.quantity
-            FROM meal_plans
-            JOIN meals ON meal_plans.meal_id = meals.id
-            JOIN tags ON meal_plans.tag_id = tags.id
-            JOIN meal_plan_ingredients ON meal_plans.id = meal_plan_ingredients.meal_plan_id
-            JOIN ingredients ON meal_plan_ingredients.ingredient_id = ingredients.id
-            WHERE meal_plans.id = $1;
-          `,
+        SELECT meal_plans.id, meals.name AS meal_name, meal_plan_ingredients.ingredient_id, ingredients.name AS ingredient_name, meal_plan_ingredients.quantity, meal_plan_ingredients.unit
+        FROM meal_plans
+        JOIN meals ON meal_plans.meal_id = meals.id
+        JOIN meal_plan_ingredients ON meal_plans.id = meal_plan_ingredients.meal_plan_id
+        JOIN ingredients ON meal_plan_ingredients.ingredient_id = ingredients.id
+        WHERE meal_plans.id = $1;
+      `,
       [mealPlanId]
     );
 
     await client.release();
 
-    return meal_plan;
+    return rows;
   } catch (e) {
     console.error(e);
-    throw new Error("Error getting meal plan");
-  }
-}
-
-//retrieves all meal plans for a given user ID
-async function getMealPlanByUser(userId) {
-  try {
-    await client.connect();
-    const { rows: mealPlans } = await client.query(
-      `
-          SELECT * FROM meal_plans
-          WHERE user_id = $1
-        `,
-      [userId]
-    );
-    await client.release();
-    return mealPlans;
-  } catch (err) {
-    console.error(err);
-    throw new Error("Error retrieving meal plans for user");
+    return null;
   }
 }
 //removes a meal from a users plan
@@ -173,6 +140,5 @@ module.exports = {
   createMealPlan,
   addMealToPlan,
   getMealPlan,
-  getMealPlanByUser,
   removeMealFromPlan,
 };

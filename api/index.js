@@ -56,6 +56,9 @@ router.use("/meals", mealsRouter);
 const mealsTagsRouter = require("./meal-tags");
 router.use("/meal-tags", mealsTagsRouter);
 
+const mealsPlansRouter = require("./meal-plans");
+router.use("/meal-plans", mealsPlansRouter);
+
 const cartRouter = require("./cart");
 router.use("/cart", cartRouter);
 
