@@ -31,7 +31,7 @@ mealPlansRouter.post("/", async (req, res, next) => {
 });
 
 // Add a meal to a meal plan
-mealPlansRouter.post("/:mealPlanId/meals", async (req, res, next) => {
+mealPlansRouter.post("/:mealPlanId/:mealId", async (req, res, next) => {
   try {
     const mealPlanId = req.params.mealPlanId;
     const { mealId, ingredients } = req.body;

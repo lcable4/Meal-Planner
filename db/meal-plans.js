@@ -1,17 +1,21 @@
 const client = require("./index");
 
 // Get meal plan for the given week
-async function getPlanByWeek(weekNumber, year) {
+async function getPlanByWeek(weekNumber) {
   try {
     await client.connect();
     const { rows } = await client.query(
       `
-        SELECT meal_plans.*, meals.name, meals.description, meals.ingredients, meals.price, meals.image
-        FROM meal_plans
-        JOIN meals ON meal_plans.meal_id = meals.id
-        WHERE meal_plans.week_number = $1 AND meal_plans.year = $2;
+      SELECT meal_plans.*, meals.name, meals.description, meals.price, meals.image,
+      json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
+      FROM meal_plans
+      JOIN meals ON meal_plans.meal_id = meals.id
+      JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
+      JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
+      WHERE meal_plans.week_number = $1
+      GROUP BY meal_plans.id, meals.id;
       `,
-      [weekNumber, year]
+      [weekNumber]
     );
     await client.release();
     return rows;
@@ -27,18 +31,17 @@ async function createMealPlan(
   weekNumber,
   dayOfWeek,
   mealName,
-  mealDescription,
-  date
+  mealDescription
 ) {
   try {
     await client.connect();
     const { rows } = await client.query(
       `
-        INSERT INTO meal_plans(meal_id, week_number, day_of_week, meal_name, meal_description, date)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO meal_plans(meal_id, week_number, day_of_week, meal_name, meal_description)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *;
       `,
-      [mealId, weekNumber, dayOfWeek, mealName, mealDescription, date]
+      [mealId, weekNumber, dayOfWeek, mealName, mealDescription]
     );
     await client.release();
     return rows[0];
@@ -92,16 +95,16 @@ async function getMealPlan(mealPlanId) {
     await client.connect();
     const { rows } = await client.query(
       `
-        SELECT meal_plans.id, meals.name AS meal_name, meal_plan_ingredients.ingredient_id, ingredients.name AS ingredient_name, meal_plan_ingredients.quantity, meal_plan_ingredients.unit
-        FROM meal_plans
-        JOIN meals ON meal_plans.meal_id = meals.id
-        JOIN meal_plan_ingredients ON meal_plans.id = meal_plan_ingredients.meal_plan_id
-        JOIN ingredients ON meal_plan_ingredients.ingredient_id = ingredients.id
-        WHERE meal_plans.id = $1;
+      SELECT meal_plans.id, meals.name AS meal_name, meal_plan_ingredients.ingredient_id, ingredients.name AS ingredient_name, meal_plan_ingredients.quantity, meal_plan_ingredients.unit
+      FROM meal_plans
+      JOIN meals ON meal_plans.meal_id = meals.id
+      JOIN meal_plan_ingredients ON meal_plans.id = meal_plan_ingredients.meal_plan_id
+      JOIN ingredients ON meal_plan_ingredients.ingredient_id = ingredients.id
+      WHERE meal_plans.id = $1;
       `,
       [mealPlanId]
     );
-
+    console.log("Rows:", rows);
     await client.release();
 
     return rows;

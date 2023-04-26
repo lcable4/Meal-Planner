@@ -151,7 +151,7 @@ async function createTables() {
           description TEXT NOT NULL,
           ingredients TEXT NOT NULL,
           upvotes INTEGER,
-          price INTEGER NOT NULL,
+          price INTEGER,
           active BOOLEAN DEFAULT TRUE,
           image VARCHAR(255),
           UNIQUE(id, name, description)
@@ -189,8 +189,7 @@ async function createTables() {
         day_of_week VARCHAR(255) NOT NULL,
         meal_name VARCHAR(255),
         meal_description TEXT,
-        date DATE NOT NULL,
-        UNIQUE(meal_id, week_number, day_of_week, meal_name, meal_description, date),
+        UNIQUE(meal_id, week_number, day_of_week, meal_name, meal_description),
         FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
         );
         
@@ -604,13 +603,8 @@ async function createInitialMealPlan() {
   try {
     await client.connect();
 
-    // Set the meal plan date
-    const date = new Date("2023-04-25");
-    // Get the month in the format 'YYYY-MM'
-    const month = date.toISOString().substring(0, 7);
-
-    // Add meals to the meal plan for each day from Monday to Friday
-    const mealIds = [1, 2, 3, 4, 5, 6]; // Example meal IDs
+    // Add meals to the meal plan for each day from Monday to Sunday
+    const mealIds = [1, 2, 3, 4, 5, 6];
     const daysOfWeek = [
       "Monday",
       "Tuesday",
@@ -620,21 +614,22 @@ async function createInitialMealPlan() {
       "Saturday",
       "Sunday",
     ];
+    const weekNumber = 1;
 
-    const weekNumber = getWeekNumber(date);
-
-    const { rows: mealPlans } = await client.query(
-      `
-        INSERT INTO meal_plans (week_number, day_of_week, meal_id, meal_name, meal_description, date)
-        SELECT $1, $2, meals.id, meals.name, meals.description, $3
+    for (let i = 0; i < daysOfWeek.length; i++) {
+      const { rows: mealPlans } = await client.query(
+        `
+        INSERT INTO meal_plans (week_number, day_of_week, meal_id, meal_name, meal_description)
+        SELECT $1, COALESCE($2, 'Monday'), meals.id, meals.name, meals.description
         FROM meals
-        WHERE meals.id IN (1, 2, 3, 4, 5, 6)
+        WHERE meals.id IN (${mealIds.join(", ")})
         RETURNING *;
-      `,
-      [weekNumber, daysOfWeek[0], date.toISOString()]
-    );
+        `,
+        [weekNumber, daysOfWeek[i]]
+      );
 
-    console.log("Meal Plan created:", mealPlans);
+      console.log("Meal Plan created:", mealPlans);
+    }
 
     await client.release();
     console.log("Finished creating meal plan!");

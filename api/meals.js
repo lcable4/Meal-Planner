@@ -10,7 +10,6 @@ const {
 
 // Get /api/meals/:id
 mealsRouter.get("/:id", async (req, res) => {
-  console.log(req, "REQ LOG");
   const { id } = req.params;
   const result = await getMealById(id);
   res.send(result);
@@ -26,11 +25,11 @@ mealsRouter.get("/", async (req, res) => {
 //Post /api/meals
 mealsRouter.post("/", async (req, res, next) => {
   if (req.admin) {
-    const { name, description, price, tags, image } = req.body;
+    const { name, description, ingredients, tags, image } = req.body;
     const data = {
       name,
       description,
-      price,
+      ingredients,
       tags,
       image,
     };
@@ -45,7 +44,7 @@ mealsRouter.post("/", async (req, res, next) => {
   }
 });
 
-mealsRouter.patch("/", async (req, res, next) => {
+mealsRouter.patch("/:mealId", async (req, res, next) => {
   const mealId = req.body.mealId;
   const fields = req.body;
   console.log(mealId);
@@ -61,8 +60,8 @@ mealsRouter.patch("/", async (req, res, next) => {
   }
 });
 
-// Delete /api/car
-mealsRouter.delete("/", async (req, res, next) => {
+// Delete /api/
+mealsRouter.delete("/:mealId", async (req, res, next) => {
   const { mealId } = req.body;
 
   try {

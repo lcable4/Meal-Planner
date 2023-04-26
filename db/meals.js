@@ -1,25 +1,26 @@
 const client = require("./index");
 
-async function createMeal({ name, description, price, image }) {
+async function createMeal(meal) {
   try {
     await client.connect();
-
-    const {
-      rows: [meal],
-    } = await client.query(
+    const { rows } = await client.query(
       `
-        INSERT INTO meals(name, description, price, image)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;`,
-      [name, description, price, image]
+      INSERT INTO meals(name, description, ingredients)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `,
+      [meal.name, meal.description, JSON.stringify(meal.ingredients)]
     );
+
+    const createdMeal = rows[0];
     await client.release();
-    return meal;
+
+    return createdMeal;
   } catch (e) {
     console.error(e);
+    throw { name: "Meal Error", message: "Error creating meals" };
   }
 }
-
 //creates a string and sets the values of the updated fields using Object.keys
 async function updateMeal({ mealId, ...fields }) {
   try {
@@ -80,30 +81,48 @@ async function getAllMeals() {
     console.error(e);
   }
 }
-
 async function getMealById(mealId) {
   try {
     await client.connect();
-    const {
-      rows: [meal],
-    } = await client.query(
+    const { rows: meals } = await client.query(
       `
-        SELECT *
-        FROM meals
-        WHERE id=$1;
-        `,
+      SELECT meals.id, meals.name, meals.description,
+        json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
+      FROM meals
+      JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
+      JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
+      WHERE meals.id = $1
+      GROUP BY meals.id;
+    `,
+      [mealId]
+    );
+
+    const { rows: tags } = await client.query(
+      `
+      SELECT meals.id AS meal_id, tags.id, tags.name, tags.active
+      FROM meals
+      JOIN meal_tags ON meals.id = meal_tags."mealId"
+      JOIN tags ON meal_tags."tagId" = tags.id
+      WHERE meals.id = $1;
+    `,
       [mealId]
     );
 
     await client.release();
 
-    return meal;
+    if (meals.length > 0) {
+      const meal = meals[0];
+      meal.tags = tags;
+      return meal;
+    } else {
+      return null;
+    }
   } catch (e) {
     console.error(e);
   }
 }
 
-//deletes a car based on the carId passed in
+//deletes a meal based on the carId passed in
 async function deleteMeal(mealId) {
   try {
     await client.connect();

@@ -6,6 +6,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
 
+const { getUserById } = require("../db/users");
+
 //sets req.user if an auth token is provided || can be changed if to include checking if the auth is a user or website admin later
 router.use(async (req, res, next) => {
   const prefix = "Bearer ";
