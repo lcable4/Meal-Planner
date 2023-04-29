@@ -4,7 +4,6 @@ const client = require("./index");
 async function getPlanByWeek(weekNumber) {
   try {
     await client.connect();
-    console.log("Connected to database");
     const { rows } = await client.query(
       `
       SELECT meal_plans.*, meals.name, meals.description, meals.price, meals.image,
@@ -19,7 +18,7 @@ async function getPlanByWeek(weekNumber) {
       [weekNumber]
     );
     await client.release();
-    console.log(rows, "ROWS LOG");
+
     return rows;
   } catch (e) {
     console.error(e);
