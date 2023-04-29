@@ -68,8 +68,9 @@ const {
   createMealPlan,
   addMealToPlan,
   getMealPlan,
-  getMealPlanByUser,
+  getPlanByWeek,
   removeMealFromPlan,
+  printMealPlan,
 } = require("./meal-plans");
 
 function getWeekNumber(date) {
@@ -92,6 +93,7 @@ async function dropTables() {
         DROP TABLE IF EXISTS cart;
         DROP TABLE IF EXISTS guest_cart;
         DROP TABLE IF EXISTS meal_plan_ingredients;
+        DROP TABLE IF EXISTS meal_plan_meals;
         DROP TABLE IF EXISTS meal_plans ;
         DROP TABLE IF EXISTS monthly_plans;
         DROP TABLE IF EXISTS meal_tags;
@@ -183,15 +185,19 @@ async function createTables() {
         );
         
         CREATE TABLE meal_plans (
+          id SERIAL PRIMARY KEY,
+          week_number INTEGER NOT NULL,
+          meal_ids INTEGER[] 
+      );
+      
+      CREATE TABLE meal_plan_meals (
         id SERIAL PRIMARY KEY,
-        meal_id INTEGER,
-        week_number INTEGER NOT NULL,
-        day_of_week VARCHAR(255) NOT NULL,
-        meal_name VARCHAR(255),
-        meal_description TEXT,
-        UNIQUE(meal_id, week_number, day_of_week, meal_name, meal_description),
-        FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
-        );
+          meal_plan_id INTEGER NOT NULL,
+          meal_id INTEGER NOT NULL,
+          day_of_week VARCHAR(255) NOT NULL,
+          FOREIGN KEY (meal_plan_id) REFERENCES meal_plans(id) ON DELETE CASCADE,
+          FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
+      );
         
         CREATE TABLE meal_plan_ingredients (
           meal_plan_id INTEGER REFERENCES meal_plans(id),
@@ -538,7 +544,15 @@ async function createInitialMeals(ingredients) {
           VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING *;
         `,
-        [name, description, meal.ingredients, upvotes, price, true, image]
+        [
+          name,
+          description,
+          JSON.stringify(meal.ingredients),
+          upvotes,
+          price,
+          true,
+          image,
+        ]
       );
 
       const createdIngredients = [];
@@ -599,43 +613,60 @@ async function createInitialMeals(ingredients) {
     throw error;
   }
 }
-async function createInitialMealPlan() {
+async function createEmptyMealPlans() {
   try {
     await client.connect();
 
-    // Add meals to the meal plan for each day from Monday to Sunday
-    const mealIds = [1, 2, 3, 4, 5, 6];
-    const daysOfWeek = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ];
-    const weekNumber = 1;
+    // Create two empty meal plans for week 1 and week 2
+    const weekNumbers = [1, 2];
 
-    for (let i = 0; i < daysOfWeek.length; i++) {
-      const { rows: mealPlans } = await client.query(
+    for (const weekNumber of weekNumbers) {
+      const { rows: mealPlan } = await client.query(
         `
-        INSERT INTO meal_plans (week_number, day_of_week, meal_id, meal_name, meal_description)
-        SELECT $1, COALESCE($2, 'Monday'), meals.id, meals.name, meals.description
-        FROM meals
-        WHERE meals.id IN (${mealIds.join(", ")})
-        RETURNING *;
+          INSERT INTO meal_plans (week_number)
+          VALUES ($1)
+          RETURNING *;
         `,
-        [weekNumber, daysOfWeek[i]]
+        [weekNumber]
       );
 
-      console.log("Meal Plan created:", mealPlans);
+      console.log(`Empty meal plan created for week ${weekNumber}:`, mealPlan);
     }
 
     await client.release();
-    console.log("Finished creating meal plan!");
+    console.log("Finished creating meal plans!");
   } catch (e) {
     console.error(e);
-    throw new Error("Error creating initial meal plan");
+    throw new Error("Error creating empty meal plans");
+  }
+}
+
+async function addMeal() {
+  try {
+    console.log("Adding meals to meal plan 1");
+    await addMealToPlan(1, 1, "Monday");
+    await addMealToPlan(1, 2, "Tuesday");
+    await addMealToPlan(1, 3, "Wednesday");
+    await addMealToPlan(1, 4, "Thursday");
+    await addMealToPlan(1, 5, "Friday");
+    await addMealToPlan(1, 6, "Saturday");
+    // await addMealToPlan(2, 1, "Monday");
+    // await addMealToPlan(2, 2, "Tuesday");
+    // await addMealToPlan(2, 3, "Wednesday");
+    // await addMealToPlan(2, 4, "Thursday");
+    // await addMealToPlan(2, 5, "Friday");
+    // await addMealToPlan(2, 6, "Saturday");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getPlan() {
+  try {
+    console.log("meals on meal plan 1");
+    await printMealPlan(1);
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -648,7 +679,9 @@ async function rebuildDB() {
   await createInitialCart();
   const ingredients = await createInitialIngredients();
   await createInitialMeals(ingredients);
-  await createInitialMealPlan();
+  await createEmptyMealPlans();
+  await addMeal(1);
+  await getPlan();
 }
 
 rebuildDB();

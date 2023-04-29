@@ -22,8 +22,13 @@ mealPlansRouter.get("/week/:weekNumber", async (req, res, next) => {
 // Create a new meal plan
 mealPlansRouter.post("/", async (req, res, next) => {
   try {
-    const { weekNumber, meals } = req.body;
-    const mealPlan = await createMealPlan(weekNumber, meals);
+    const { day_of_week, weekNumber, mealName, mealDescription } = req.body;
+    const mealPlan = await createMealPlan(
+      day_of_week,
+      weekNumber,
+      mealName,
+      mealDescription
+    );
     res.status(201).json(mealPlan);
   } catch (e) {
     next(e);

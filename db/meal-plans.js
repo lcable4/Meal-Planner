@@ -4,12 +4,13 @@ const client = require("./index");
 async function getPlanByWeek(weekNumber) {
   try {
     await client.connect();
+    console.log("Connected to database");
     const { rows } = await client.query(
       `
       SELECT meal_plans.*, meals.name, meals.description, meals.price, meals.image,
       json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
-      FROM meal_plans
-      JOIN meals ON meal_plans.meal_id = meals.id
+      FROM meal_plans, unnest(meal_plans.meal_ids) AS meal_id
+      JOIN meals ON meal_id = meals.id
       JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
       JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
       WHERE meal_plans.week_number = $1
@@ -18,6 +19,7 @@ async function getPlanByWeek(weekNumber) {
       [weekNumber]
     );
     await client.release();
+    console.log(rows, "ROWS LOG");
     return rows;
   } catch (e) {
     console.error(e);
@@ -26,22 +28,16 @@ async function getPlanByWeek(weekNumber) {
 }
 
 // Create a new meal plan
-async function createMealPlan(
-  mealId,
-  weekNumber,
-  dayOfWeek,
-  mealName,
-  mealDescription
-) {
+async function createMealPlan(mealPlanId, weekNumber) {
   try {
     await client.connect();
     const { rows } = await client.query(
       `
-        INSERT INTO meal_plans(meal_id, week_number, day_of_week, meal_name, meal_description)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO meal_plans(mealPlanId, week_number )
+        VALUES ($1, $2)
         RETURNING *;
       `,
-      [mealId, weekNumber, dayOfWeek, mealName, mealDescription]
+      [mealPlanId, weekNumber]
     );
     await client.release();
     return rows[0];
@@ -51,60 +47,21 @@ async function createMealPlan(
   }
 }
 
-// Add a meal to a plan
-async function addMealToPlan(mealPlanId, mealId, tagId, ingredientQuantities) {
-  try {
-    await client.connect();
-    const { rows } = await client.query(
-      `
-        INSERT INTO meal_plans(id, meal_id, tag_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (id) DO UPDATE
-        SET meal_id = EXCLUDED.meal_id, tag_id = EXCLUDED.tag_id
-        RETURNING *;
-      `,
-      [mealPlanId, mealId, tagId]
-    );
-    const values = ingredientQuantities
-      .map((iq) => `($1, $2, $3, $4)`)
-      .join(",");
-    const args = ingredientQuantities.reduce(
-      (acc, iq) => [...acc, mealPlanId, iq.ingredientId, iq.quantity, iq.unit],
-      []
-    );
-    await client.query(
-      `
-        INSERT INTO meal_plan_ingredients(meal_plan_id, ingredient_id, quantity, unit)
-        VALUES ${values}
-        ON CONFLICT (meal_plan_id, ingredient_id) DO UPDATE
-        SET quantity = EXCLUDED.quantity, unit = EXCLUDED.unit;
-      `,
-      args
-    );
-    await client.release();
-    return rows[0];
-  } catch (e) {
-    console.error(e);
-    throw new Error("Error adding meal to your plan");
-  }
-}
-
 // Get a meal plan by its ID
 async function getMealPlan(mealPlanId) {
   try {
     await client.connect();
     const { rows } = await client.query(
       `
-      SELECT meal_plans.id, meals.name AS meal_name, meal_plan_ingredients.ingredient_id, ingredients.name AS ingredient_name, meal_plan_ingredients.quantity, meal_plan_ingredients.unit
+      SELECT meal_plan_meals.meal_id, meals.name AS meal_name
       FROM meal_plans
-      JOIN meals ON meal_plans.meal_id = meals.id
-      JOIN meal_plan_ingredients ON meal_plans.id = meal_plan_ingredients.meal_plan_id
-      JOIN ingredients ON meal_plan_ingredients.ingredient_id = ingredients.id
-      WHERE meal_plans.id = $1;
+      JOIN meal_plan_meals ON meal_plans.id = meal_plan_meals.meal_plan_id
+      JOIN meals ON meal_plan_meals.meal_id = meals.id
+      WHERE meal_plans.id = $1
+      GROUP BY meal_plan_meals.meal_id, meals.name;
       `,
       [mealPlanId]
     );
-    console.log("Rows:", rows);
     await client.release();
 
     return rows;
@@ -112,6 +69,29 @@ async function getMealPlan(mealPlanId) {
     console.error(e);
     return null;
   }
+}
+// Add a meal to a plan
+async function addMealToPlan(mealPlanId, mealId, dayOfWeek) {
+  const query = `
+      INSERT INTO meal_plan_meals (meal_plan_id, meal_id, day_of_week)
+      VALUES ($1, $2, $3)
+      RETURNING id;
+    `;
+  const result = await client.query(query, [mealPlanId, mealId, dayOfWeek]);
+  const mealPlanMealId = result.rows[0].id;
+
+  const mealPlan = await getMealPlan(mealPlanId);
+  const mealIds = mealPlan.map((meal) => meal.meal_id);
+  mealIds.push(mealId);
+
+  const updateQuery = `
+      UPDATE meal_plans
+      SET meal_ids = $1
+      WHERE id = $2;
+    `;
+  await client.query(updateQuery, [mealIds, mealPlanId]);
+
+  return mealPlanMealId;
 }
 //removes a meal from a users plan
 async function removeMealFromPlan(mealPlanId) {
@@ -138,10 +118,26 @@ async function removeMealFromPlan(mealPlanId) {
   }
 }
 
+async function printMealPlan(weekNumber) {
+  try {
+    const plan = await getPlanByWeek(weekNumber);
+    console.log(`Meal Plan for Week ${weekNumber}:`);
+    for (let meal of plan) {
+      console.log(`- ${meal.name}: ${meal.description}`);
+      console.log(
+        `  Ingredients: ${meal.ingredients.map((i) => i.name).join(", ")}`
+      );
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 module.exports = {
   getPlanByWeek,
   createMealPlan,
   addMealToPlan,
   getMealPlan,
   removeMealFromPlan,
+  printMealPlan,
 };
