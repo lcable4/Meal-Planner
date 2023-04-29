@@ -154,6 +154,22 @@ async function createInitialIngredients() {
       { name: "Brown Rice" },
       { name: "Soy Sauce" },
       { name: "Sesame Seeds" },
+      { name: "Chile Powder" },
+      { name: "Smoked Paprika" },
+      { name: "Salsa Verde" },
+      { name: "Cream Cheese" },
+      { name: "Cilantro" },
+      { name: "Corn Tortillas" },
+      { name: "Cheddar" },
+      { name: "Brussel Sprouts" },
+      { name: "Hot Sauce" },
+      { name: "Cayenne Pepper" },
+      { name: "Onion Powder" },
+      { name: "Rice" },
+      { name: "Thyme" },
+      { name: "Short Ribs" },
+      { name: "Bay Leaves" },
+      { name: "Beef Broth" },
     ];
     const createdIngredients = [];
 
@@ -172,7 +188,6 @@ async function createInitialIngredients() {
       );
 
       createdIngredients.push(createdIngredient);
-      console.log("ingredient:", createdIngredient);
     }
     console.log("ingredients created:", createdIngredients);
     console.log("Finished creating ingredients!");
@@ -182,40 +197,11 @@ async function createInitialIngredients() {
     throw error;
   }
 }
-async function createInitialMeals(ingredients) {
+async function createInitialMeals() {
   console.log("Starting to create meals...");
 
   try {
     const mealsToCreate = [
-      {
-        name: "Lemon Pepper Chicken Thighs",
-        description:
-          "Cook sliced chicken breast in a pan with ginger, garlic, soy sauce, and sesame oil. Add sliced vegetables like bell peppers, carrots, and snow peas and stir-fry until tender. Serve over brown rice.",
-        ingredients: [
-          { id: 2, name: "Chicken Thighs", quantity: 4, unit: "thighs" },
-          { id: 39, name: "Soy Sauce", quantity: 1, unit: "tbsp" },
-          { id: 40, name: "Sesame Seeds", quantity: 1, unit: "tbsp" },
-          { id: 8, name: "Bell Pepper", quantity: 1, unit: "medium" },
-        ],
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Asian", "Dinner", "Lunch"],
-      },
-      {
-        name: "Teriyaki Salmon",
-        description:
-          "Brush salmon fillets with teriyaki sauce and bake in the oven until cooked through. Serve with steamed broccoli and brown rice.",
-        ingredients: [
-          { id: 2, name: "Salmon", quantity: 1, unit: "pound" },
-          { id: 3, name: "Garlic", quantity: 2, unit: "cloves" },
-          { id: 38, name: "Brown Rice", quantity: 1, unit: "cup" },
-        ],
-        upvotes: 0,
-        price: 5,
-        image: "",
-        tags: ["Asian", "Dinner", "Lunch"],
-      },
       {
         name: "Southwest Scramble",
         description:
@@ -292,6 +278,119 @@ async function createInitialMeals(ingredients) {
         image: "",
         tags: ["Gluten Free", "Dessert"],
       },
+      {
+        name: "Lemon Pepper Chicken Thighs",
+        description:
+          "Preheat oven to 350 degrees. In a small bowl, combine lemon zest, garlic powder, salt and pepper. Place chicken breasts in a baking dish. Rub chicken on all sides with the lemon pepper mixture. Bake for 25-30 minutes until internal temperature reaches 165 degrees. Toss the potato wedges and asparagus in olive oil, salt, and pepper. Place the potatoes and asparagus on a sheet pan and bake at the same time as chicken. Chicken and asparagus for 25-30 minutes, potatoes for about 1 hour. Top with grated parmesan.",
+        ingredients: [
+          { id: 2, name: "Chicken Thighs", quantity: 4, unit: "thighs" },
+          { id: 32, name: "Olive Oil", quantity: 1, unit: "tbsp" },
+          { id: 19, name: "Lemon Juice", quantity: "1/4", unit: "cup" },
+          { id: 33, name: "Lemon Zest", quantity: 3, unit: "lemons" },
+          { id: 34, name: "Garlic Powder", quantity: "1/2", unit: "tsp" },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 36, name: "Parsley", quantity: null, unit: null },
+          { id: 7, name: "Potatoes", quantity: 4, unit: "potatoes" },
+          { id: 37, name: "Asparagus", quantity: null, unit: null },
+          { id: 38, name: "Grated Parmesan", quantity: null, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Dinner", "Lunch"],
+      },
+      {
+        name: "Green Chile Enchilada Bake",
+        description:
+          "Preheat the oven to 400 degrees. In a large oven-safe skillet, combine the olive oil, beef, onion, and peppers. Cook, breaking up the meat as it cooks, until browned, about 5 minutes. Add the chili powder, paprika, and garlic powder, 1 cup water, 6 oz salsa verde, and season with salt. Simmer 5-8 minutes. Mix in the cream cheese until melted. Remove from the heat and stir in the cilantro. Sprinkle the shredded cheese onto the top of the meat mixture. Place the tortillas in a flat layer overtop of the meat. Pour over the remaining jar of salsa verde. Top with the remaining shredded cheddar. Bake for 15-20 minutes, until the cheese has melted.Serve warm. Top with avocado, cilantro, chopped green onions, jalapeños, pico de gallo, etc.",
+        ingredients: [
+          { id: 5, name: "Beef", quantity: 1, unit: "lb" },
+          { id: 8, name: "Onions", quantity: 1, unit: "onion" },
+          { id: 43, name: "Chile Powder", quantity: null, unit: null },
+          { id: 44, name: "Smoked Paprika", quantity: null, unit: null },
+          { id: 34, name: "Garlic Powder", quantity: null, unit: null },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 45, name: "Salsa Verde", quantity: null, unit: null },
+          { id: 46, name: "Cream Cheese", quantity: null, unit: null },
+          { id: 47, name: "Cilantro", quantity: null, unit: null },
+          { id: 48, name: "Corn Tortillas", quantity: null, unit: null },
+          { id: 49, name: "Cheddar", quantity: null, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Mexican", "Dinner", "Lunch"],
+      },
+      {
+        name: "Hot Honey Salmon Bowls With Avocado Crema",
+        description:
+          "Preheat the oven to 450 degrees. On a baking sheet, toss the salmon with 3 tbsp olive oil, paprika, salt, and pepper. Arrange in a single layer. On the other side of the pan, add the brussels sprouts. Toss with olive oil, salt, and pepper. Roast 10-15 minutes or until the salmon is just undercooked. To make the hot honey, warm together the honey, hot sauce, cayenne, chili powder, onion powder, and garlic powder, and salt. Spoon some of the hot honey over the salmon. Switch the oven to broil and broil until lightly charred and crispy. Spoon over more hot honey if desired. Arrange the salmon and asparagus over bowls of rice. Top with crema.",
+        ingredients: [
+          { id: 3, name: "Salmon", quantity: null, unit: null },
+          { id: 32, name: "Olive Oil", quantity: null, unit: null },
+          { id: 44, name: "Smoked Paprika", quantity: null, unit: null },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 23, name: "Honey", quantity: null, unit: null },
+          { id: 43, name: "Chile Powder", quantity: null, unit: null },
+          { id: 34, name: "Garlic Powder", quantity: null, unit: null },
+          { id: 50, name: "Brussel Sprouts", quantity: null, unit: null },
+          { id: 51, name: "Hot Sauce", quantity: null, unit: null },
+          { id: 52, name: "Cayenne Pepper", quantity: null, unit: null },
+          { id: 53, name: "Onion Powder", quantity: null, unit: null },
+          { id: 54, name: "Rice", quantity: null, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Mexican", "Dinner", "Lunch"],
+      },
+      {
+        name: "Slow Cooked French Onion Short Ribs",
+        description:
+          "Preheat oven to 300 degrees. Heat a dutch oven over medium/high heat. Add 2 tablespoons of olive oil and the sliced onions. Cook, stirring only occasionally, for 5 minutes. Add the butter to the onions along with salt, pepper, and thyme sprigs. Cook, stirring only occasionally for 15-20 minutes, or until the onions are lightly golden brown and caramelized. Remove the thyme sprigs. Remove the onions and set aside. Add the olive oil to the same skillet and season the prepared short ribs with the salt and pepper. Heat the skillet to medium/high and sear the short ribs on all sides until deeply brown (about 4-5 minutes per side). Add the bay leaves and additional fresh thyme to the pot with the short ribs. Top the ribs with the caramelized onions. Set aside. Reduce the heat to medium/low. Add the beef stock and scrape up the browned bits from the bottom. Season the braising liquid with salt and pepper. Pour the braising liquid over the prepared short ribs in the dutch oven and cover the pot. Cook, covered, for 3 hours. Use a slotted spoon to remove the short ribs and caramelized onions from the pot (keep warm), leaving the liquid behind. Place the braising liquid in the dutch oven onto the stovetop and bring it to a medium simmer. Simmer for about 10 minutes to thicken and reduce the sauce. To serve, add the ribs and onions to a platter and spoon the sauce over top.",
+        ingredients: [
+          { id: 8, name: "Onions", quantity: null, unit: null },
+          { id: 32, name: "Olive Oil", quantity: null, unit: null },
+          { id: 26, name: "Butter", quantity: null, unit: null },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 55, name: "Thyme", quantity: null, unit: null },
+          { id: 56, name: "Short Ribs", quantity: null, unit: null },
+          { id: 57, name: "Bay Leaves", quantity: null, unit: null },
+          { id: 58, name: "Beef Broth", quantity: null, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Dinner", "Lunch"],
+      },
+      {
+        name: "Chicken Fajita Tortilla Bowls",
+        description:
+          "Toss the chicken in olive oil, paprika, chili powder, cumin, salt, and pepper. Heat a skillet over high heat. Cook until seared all over and cooked through, 8-10 minutes. During the last 2 minutes of cooking, add the garlic. Cook 1 minute, then remove and set aside. In the same skillet, add the onions and cook until fragrant, about 5 minutes. Toss in the bell peppers. Season with salt and pepper. Cook until the peppers are tender, another 5 minutes. Add the chicken back to the pan. Add the frozen corn to  a skillet and cook until charred on all sides. To make the vinaigrette, combine all ingredients in a glass jar and shake. Season with salt. Spoon the chicken and peppers over the bowls of rice. Top with lettuce and the corn. Pour over the vinaigrette. Top with avocado, jalapeños, feta, and cilantro. Serve with tortillas.",
+        ingredients: [
+          { id: 32, name: "Olive Oil", quantity: null, unit: null },
+          { id: 1, name: "Chicken Breast", quantity: null, unit: null },
+          { id: 44, name: "Smoked Paprika", quantity: null, unit: null },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 8, name: "Onions", quantity: null, unit: null },
+          { id: 4, name: "Garlic", quantity: null, unit: null },
+          { id: 9, name: "Bell Pepper", quantity: null, unit: null },
+          { id: 54, name: "Rice", quantity: null, unit: null },
+          { id: 45, name: "Salsa Verde", quantity: null, unit: null },
+          { id: 20, name: "Lime Juice", quantity: null, unit: null },
+          { id: 23, name: "Honey", quantity: null, unit: null },
+          { id: 47, name: "Cilantro", quantity: null, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["Mexican", "Dinner", "Lunch"],
+      },
     ];
 
     const createdMeals = [];
@@ -322,20 +421,17 @@ async function createInitialMeals(ingredients) {
       const createdIngredients = [];
 
       for (let j = 0; j < meal.ingredients.length; j++) {
-        const { id, quantity } = meal.ingredients[j];
-        console.log(meal.ingredients[j], "/////////");
-        console.log("ingredient id:", id);
+        const { id, quantity, unit } = meal.ingredients[j];
         const {
           rows: [createdMealIngredient],
         } = await client.query(
           `
-              INSERT INTO meal_ingredients(meal_id, ingredient_id, quantity)
-              VALUES ($1, $2, $3)
+              INSERT INTO meal_ingredients(meal_id, ingredient_id, quantity, unit)
+              VALUES ($1, $2, $3, $4)
               RETURNING *;
             `,
-          [createdMeal.id, meal.ingredients[j].id, quantity]
+          [createdMeal.id, meal.ingredients[j].id, quantity, unit]
         );
-        console.log(createdMealIngredient, "CREATED MEAL INGREDIENT LOG");
         createdIngredients.push(createdMealIngredient);
       }
 
@@ -353,7 +449,6 @@ async function createInitialMeals(ingredients) {
         );
 
         if (tag) {
-          console.log(tag, "TAG LOG");
           await addTagToMeal(createdMeal.id, tag.id);
         }
       }

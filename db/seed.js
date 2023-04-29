@@ -136,7 +136,6 @@ async function rebuildDB() {
   await seedData.createInitialMeals(ingredients);
   await createEmptyMealPlans();
   await addMeals();
-  await getPlan();
 }
 
 rebuildDB();
