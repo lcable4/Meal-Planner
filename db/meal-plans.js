@@ -33,7 +33,6 @@ async function getMealPlan(mealPlanId) {
     const { rows } = await client.query(
       `
       SELECT meal_plan_meals.meal_id, meals.name AS meal_name
-      json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
       FROM meal_plans
       JOIN meal_plan_meals ON meal_plans.id = meal_plan_meals.meal_plan_id
       JOIN meals ON meal_plan_meals.meal_id = meals.id
