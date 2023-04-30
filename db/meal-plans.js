@@ -26,6 +26,30 @@ async function getPlanByWeek(weekNumber) {
   }
 }
 
+// Get a meal plan by its ID
+async function getMealPlan(mealPlanId) {
+  try {
+    await client.connect();
+    const { rows } = await client.query(
+      `
+      SELECT meal_plan_meals.meal_id, meals.name AS meal_name
+      json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
+      FROM meal_plans
+      JOIN meal_plan_meals ON meal_plans.id = meal_plan_meals.meal_plan_id
+      JOIN meals ON meal_plan_meals.meal_id = meals.id
+      WHERE meal_plans.id = $1
+      GROUP BY meal_plan_meals.meal_id, meals.name;
+      `,
+      [mealPlanId]
+    );
+    await client.release();
+
+    return rows;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
 // Create a new meal plan
 async function createMealPlan(mealPlanId, weekNumber) {
   try {
@@ -43,30 +67,6 @@ async function createMealPlan(mealPlanId, weekNumber) {
   } catch (e) {
     console.error(e);
     throw new Error("Error creating meal plan");
-  }
-}
-
-// Get a meal plan by its ID
-async function getMealPlan(mealPlanId) {
-  try {
-    await client.connect();
-    const { rows } = await client.query(
-      `
-      SELECT meal_plan_meals.meal_id, meals.name AS meal_name
-      FROM meal_plans
-      JOIN meal_plan_meals ON meal_plans.id = meal_plan_meals.meal_plan_id
-      JOIN meals ON meal_plan_meals.meal_id = meals.id
-      WHERE meal_plans.id = $1
-      GROUP BY meal_plan_meals.meal_id, meals.name;
-      `,
-      [mealPlanId]
-    );
-    await client.release();
-
-    return rows;
-  } catch (e) {
-    console.error(e);
-    return null;
   }
 }
 // Add a meal to a plan

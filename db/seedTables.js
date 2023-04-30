@@ -112,7 +112,7 @@ async function createTables() {
         id SERIAL PRIMARY KEY,
           meal_plan_id INTEGER NOT NULL,
           meal_id INTEGER NOT NULL,
-          day_of_week VARCHAR(255) NOT NULL,
+          day_of_week VARCHAR(255),
           FOREIGN KEY (meal_plan_id) REFERENCES meal_plans(id) ON DELETE CASCADE,
           FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
       );

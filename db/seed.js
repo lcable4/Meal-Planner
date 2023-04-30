@@ -98,19 +98,16 @@ async function createEmptyMealPlans() {
 async function addMeals() {
   try {
     console.log("Adding meals to meal plan 1");
-    await addMealToPlan(1, 1, "Monday");
-    await addMealToPlan(1, 2, "Tuesday");
-    await addMealToPlan(1, 3, "Wednesday");
-    await addMealToPlan(1, 4, "Thursday");
-    await addMealToPlan(1, 5, "Friday");
-    await addMealToPlan(1, 6, "Saturday");
-    console.log("Adding meals to meal plan 2");
-    await addMealToPlan(2, 1, "Monday");
-    await addMealToPlan(2, 2, "Tuesday");
-    await addMealToPlan(2, 3, "Wednesday");
-    await addMealToPlan(2, 4, "Thursday");
-    await addMealToPlan(2, 5, "Friday");
-    await addMealToPlan(2, 6, "Saturday");
+    await addMealToPlan(1, 1);
+    await addMealToPlan(1, 2);
+    await addMealToPlan(1, 3);
+    await addMealToPlan(1, 4);
+    await addMealToPlan(1, 5, "Monday");
+    await addMealToPlan(1, 6, "Tuesday");
+    await addMealToPlan(1, 7, "Wednesday");
+    await addMealToPlan(1, 8, "Thursday");
+    await addMealToPlan(1, 9, "Friday");
+    await addMealToPlan(1, 10, "Saturday");
   } catch (error) {
     console.log(error);
   }

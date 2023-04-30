@@ -75,6 +75,10 @@ async function createInitialTags() {
       "Lunch",
       "Dinner",
       "Drinks",
+      "Chicken",
+      "Beef",
+      "Pork",
+      "Fish",
     ];
     const tags = [];
 
@@ -165,11 +169,17 @@ async function createInitialIngredients() {
       { name: "Hot Sauce" },
       { name: "Cayenne Pepper" },
       { name: "Onion Powder" },
+      { name: "Chili Powder" },
+      { name: "Cumin" },
+      { name: "Corn" },
+      { name: "Jalapenos" },
       { name: "Rice" },
       { name: "Thyme" },
       { name: "Short Ribs" },
       { name: "Bay Leaves" },
       { name: "Beef Broth" },
+      { name: "Greek Yogurt" },
+      { name: "Green Onion" },
     ];
     const createdIngredients = [];
 
@@ -298,7 +308,7 @@ async function createInitialMeals() {
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Dinner", "Lunch"],
+        tags: ["Dinner", "Lunch", "Chicken"],
       },
       {
         name: "Green Chile Enchilada Bake",
@@ -321,7 +331,7 @@ async function createInitialMeals() {
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Mexican", "Dinner", "Lunch"],
+        tags: ["Mexican", "Dinner", "Lunch", "Beef"],
       },
       {
         name: "Hot Honey Salmon Bowls With Avocado Crema",
@@ -345,7 +355,7 @@ async function createInitialMeals() {
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Mexican", "Dinner", "Lunch"],
+        tags: ["Mexican", "Dinner", "Lunch", "Fish"],
       },
       {
         name: "Slow Cooked French Onion Short Ribs",
@@ -365,7 +375,7 @@ async function createInitialMeals() {
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Dinner", "Lunch"],
+        tags: ["Dinner", "Lunch", "Beef"],
       },
       {
         name: "Chicken Fajita Tortilla Bowls",
@@ -385,11 +395,41 @@ async function createInitialMeals() {
           { id: 20, name: "Lime Juice", quantity: null, unit: null },
           { id: 23, name: "Honey", quantity: null, unit: null },
           { id: 47, name: "Cilantro", quantity: null, unit: null },
+          { id: 54, name: "Chili Powder", quantity: null, unit: null },
+          { id: 55, name: "Cumin", quantity: null, unit: null },
+          { id: 56, name: "Corn", quantity: null, unit: null },
+          { id: 57, name: "Jalapenos", quantity: null, unit: null },
         ],
         upvotes: 0,
         price: 5,
         image: "",
-        tags: ["Mexican", "Dinner", "Lunch"],
+        tags: ["Mexican", "Dinner", "Lunch", "Chicken"],
+      },
+      {
+        name: "Sheet Pan Chili Honey Chicken",
+        description:
+          "Heat the oven 375 degrees. Line a baking sheet with parchment paper. In a small bowl mix together the warmed honey, olive oil, cayenne, chili powder, salt, pepper, ginger and garlic powder until fully combined. Place the chicken and sweet potatoes on the baking sheet and pour the spice mixture over and toss until completely coated. Place the chicken and potatoes in the oven for 15 minutes before turning the broiler onto high for 5-8 until the chicken is caramelized and browned and the sweet potatoes are tender. Meanwhile, in the base of a food processor or blender, add the greek yogurt, cilantro, lime juice, garlic powder, salt, jalapeño, chili powder and 2 green onions, blend until smooth.",
+        ingredients: [
+          { id: 23, name: "Honey", quantity: 3, unit: "tbsp" },
+          { id: 32, name: "Olive Oil", quantity: "1/4", unit: "cup" },
+          { id: 2, name: "Chicken Thighs", quantity: "2 1/2", unit: "lbs" },
+          { id: 52, name: "Cayenne Pepper", quantity: "1/4", unit: "tsp" },
+          { id: 54, name: "Chili Powder", quantity: 2, unit: "tsp" },
+          { id: 34, name: "Garlic Powder", quantity: "1/2", unit: "tsp" },
+          { id: 17, name: "Ginger", quantity: "1/2", unit: "tsp" },
+          { id: 13, name: "Sea Salt", quantity: null, unit: null },
+          { id: 14, name: "Pepper", quantity: null, unit: null },
+          { id: 7, name: "Potatoes", quantity: 4, unit: null },
+          { id: 47, name: "Cilantro", quantity: "1/4", unit: "cup" },
+          { id: 20, name: "Lime Juice", quantity: 1, unit: "tsp" },
+          { id: 57, name: "Jalapenos", quantity: 1, unit: null },
+          { id: 63, name: "Greek Yogurt", quantity: "3/4", unit: "cup" },
+          { id: 64, name: "Green Onion", quantity: 6, unit: null },
+        ],
+        upvotes: 0,
+        price: 5,
+        image: "",
+        tags: ["American", "Dinner", "Lunch", "Chicken"],
       },
     ];
 
