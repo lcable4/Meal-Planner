@@ -6,14 +6,17 @@ async function getPlanByWeek(weekNumber) {
     await client.connect();
     const { rows } = await client.query(
       `
-      SELECT meal_plans.*, meals.name, meals.description, meals.price, meals.image,
-      json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', ingredients.unit)) AS ingredients
-      FROM meal_plans, unnest(meal_plans.meal_ids) AS meal_id
-      JOIN meals ON meal_id = meals.id
-      JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
-      JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
-      WHERE meal_plans.week_number = $1
-      GROUP BY meal_plans.id, meals.id;
+      SELECT 
+        meal_plans.week_number, 
+        json_agg(DISTINCT meals.id) AS meal_ids 
+      FROM 
+        meal_plans 
+        JOIN unnest(meal_plans.meal_ids) AS meal_id ON true 
+        JOIN meals ON meal_id = meals.id 
+      WHERE 
+        meal_plans.week_number = $1 
+      GROUP BY 
+        meal_plans.week_number;
       `,
       [weekNumber]
     );
