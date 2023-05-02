@@ -68,6 +68,7 @@ async function createTables() {
         name VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
         ingredients TEXT NOT NULL,
+        servings INTEGER NOT NULL,
         upvotes INTEGER,
         price INTEGER,
         active BOOLEAN DEFAULT TRUE,
