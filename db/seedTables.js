@@ -80,14 +80,16 @@ async function createTables() {
         id SERIAL PRIMARY KEY UNIQUE,
         name VARCHAR(255) UNIQUE NOT NULL,
         quantity VARCHAR(255),
-        unit VARCHAR(255)
+        unit VARCHAR(255),
+        category VARCHAR(255)
       );
       
       CREATE TABLE meal_ingredients(
         meal_id INTEGER REFERENCES meals(id),
         ingredient_id INTEGER REFERENCES ingredients(id),
         quantity VARCHAR(255),
-        unit VARCHAR(255)
+        unit VARCHAR(255),
+        category VARCHAR(255)
       );
 
       CREATE TABLE tags(

@@ -87,7 +87,7 @@ async function getMealById(mealId) {
     const { rows: meals } = await client.query(
       `
       SELECT meals.id, meals.name, meals.description, meals.servings,
-        json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', meal_ingredients.unit)) AS ingredients
+        json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name, 'quantity', meal_ingredients.quantity, 'unit', meal_ingredients.unit, 'category', meal_ingredients.category)) AS ingredients
       FROM meals
       JOIN meal_ingredients ON meals.id = meal_ingredients.meal_id
       JOIN ingredients ON meal_ingredients.ingredient_id = ingredients.id
