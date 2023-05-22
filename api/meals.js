@@ -25,11 +25,12 @@ mealsRouter.get("/", async (req, res) => {
 //Post /api/meals
 mealsRouter.post("/", async (req, res, next) => {
   if (req.admin) {
-    const { name, description, ingredients, tags, image } = req.body;
+    const { name, description, ingredients, servings, tags, image } = req.body;
     const data = {
       name,
       description,
       ingredients,
+      servings,
       tags,
       image,
     };

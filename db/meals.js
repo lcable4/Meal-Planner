@@ -5,11 +5,16 @@ async function createMeal(meal) {
     await client.connect();
     const { rows } = await client.query(
       `
-      INSERT INTO meals(name, description, ingredients)
-      VALUES ($1, $2, $3)
+      INSERT INTO meals(name, description, ingredients, servings)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `,
-      [meal.name, meal.description, JSON.stringify(meal.ingredients)]
+      [
+        meal.name,
+        meal.description,
+        JSON.stringify(meal.ingredients),
+        meal.servings,
+      ]
     );
 
     const createdMeal = rows[0];

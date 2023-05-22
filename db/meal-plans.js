@@ -72,13 +72,13 @@ async function createMealPlan(mealPlanId, weekNumber) {
   }
 }
 // Add a meal to a plan
-async function addMealToPlan(mealPlanId, mealId, dayOfWeek) {
+async function addMealToPlan(mealPlanId, mealId) {
   const query = `
-      INSERT INTO meal_plan_meals (meal_plan_id, meal_id, day_of_week)
-      VALUES ($1, $2, $3)
+      INSERT INTO meal_plan_meals (meal_plan_id, meal_id)
+      VALUES ($1, $2)
       RETURNING id;
     `;
-  const result = await client.query(query, [mealPlanId, mealId, dayOfWeek]);
+  const result = await client.query(query, [mealPlanId, mealId]);
   const mealPlanMealId = result.rows[0].id;
 
   const mealPlan = await getMealPlan(mealPlanId);
