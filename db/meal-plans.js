@@ -1,10 +1,30 @@
-const client = require("./index");
+const dbClient = require("./index");
+const pool = require("./index");
+
+// Get all meal plans created
+async function getAllMealPlans() {
+  try {
+    await dbClient.connect();
+    const { rows } = await dbClient.query(
+      `
+      SELECT *
+      FROM meal_plans
+      `
+    );
+    await dbClient.release();
+
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error getting all meal plans");
+  }
+}
 
 // Get meal plan for the given week
 async function getPlanByWeek(weekNumber) {
   try {
-    await client.connect();
-    const { rows } = await client.query(
+    await dbClient.connect();
+    const { rows } = await dbClient.query(
       `
       SELECT 
         meal_plans.week_number, 
@@ -20,7 +40,7 @@ async function getPlanByWeek(weekNumber) {
       `,
       [weekNumber]
     );
-    await client.release();
+    await dbClient.release();
 
     return rows;
   } catch (e) {
@@ -32,19 +52,19 @@ async function getPlanByWeek(weekNumber) {
 // Get a meal plan by its ID
 async function getMealPlan(mealPlanId) {
   try {
-    await client.connect();
-    const { rows } = await client.query(
+    await dbClient.connect();
+    const { rows } = await dbClient.query(
       `
-      SELECT meal_plan_meals.meal_id, meals.name AS meal_name
+      SELECT meals.id AS meal_id, meals.name AS meal_name
       FROM meal_plans
       JOIN meal_plan_meals ON meal_plans.id = meal_plan_meals.meal_plan_id
       JOIN meals ON meal_plan_meals.meal_id = meals.id
-      WHERE meal_plans.id = $1
-      GROUP BY meal_plan_meals.meal_id, meals.name;
+      WHERE meal_plans.id = $1;
+
       `,
       [mealPlanId]
     );
-    await client.release();
+    await dbClient.release();
 
     return rows;
   } catch (e) {
@@ -55,8 +75,8 @@ async function getMealPlan(mealPlanId) {
 // Create a new meal plan
 async function createMealPlan(mealPlanId, weekNumber) {
   try {
-    await client.connect();
-    const { rows } = await client.query(
+    await dbClient.connect();
+    const { rows } = await dbClient.query(
       `
         INSERT INTO meal_plans(mealPlanId, week_number )
         VALUES ($1, $2)
@@ -64,7 +84,7 @@ async function createMealPlan(mealPlanId, weekNumber) {
       `,
       [mealPlanId, weekNumber]
     );
-    await client.release();
+    await dbClient.release();
     return rows[0];
   } catch (e) {
     console.error(e);
@@ -73,49 +93,48 @@ async function createMealPlan(mealPlanId, weekNumber) {
 }
 // Add a meal to a plan
 async function addMealToPlan(mealPlanId, mealId) {
-  const query = `
+  try {
+    await dbClient.connect();
+
+    const query = `
       INSERT INTO meal_plan_meals (meal_plan_id, meal_id)
       VALUES ($1, $2)
       RETURNING id;
     `;
-  const result = await client.query(query, [mealPlanId, mealId]);
-  const mealPlanMealId = result.rows[0].id;
 
-  const mealPlan = await getMealPlan(mealPlanId);
-  const mealIds = mealPlan.map((meal) => meal.meal_id);
-  mealIds.push(mealId);
+    const result = await dbClient.query(query, [mealPlanId, mealId]);
+    const mealPlanMealId = result.rows[0].id;
 
-  const updateQuery = `
-      UPDATE meal_plans
-      SET meal_ids = $1
-      WHERE id = $2;
-    `;
-  await client.query(updateQuery, [mealIds, mealPlanId]);
-
-  return mealPlanMealId;
-}
-//removes a meal from a users plan
-async function removeMealFromPlan(mealPlanId) {
-  try {
-    await client.connect();
-
-    const {
-      rows: [deletedMealPlan],
-    } = await client.query(
-      `
-            DELETE FROM meal_plans
-            WHERE id = $1
-            RETURNING *;
-          `,
-      [mealPlanId]
-    );
-
-    await client.release();
-
-    return deletedMealPlan;
+    return mealPlanMealId;
   } catch (e) {
     console.error(e);
-    throw new Error("Error removing meal from your plan");
+    throw new Error("Error adding meal to the plan");
+  } finally {
+    await dbClient.release();
+  }
+}
+
+// Remove a meal from a user's plan
+async function removeMealFromPlan(mealPlanId, mealId) {
+  try {
+    await dbClient.connect();
+
+    const query = `
+      DELETE FROM meal_plan_meals
+      WHERE meal_plan_id = $1 AND meal_id = $2
+      RETURNING *;
+    `;
+
+    const {
+      rows: [deletedMealPlanMeal],
+    } = await dbClient.query(query, [mealPlanId, mealId]);
+
+    await dbClient.release();
+
+    return deletedMealPlanMeal;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error removing meal from the plan");
   }
 }
 
@@ -141,4 +160,5 @@ module.exports = {
   getMealPlan,
   removeMealFromPlan,
   printMealPlan,
+  getAllMealPlans,
 };

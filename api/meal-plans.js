@@ -6,8 +6,20 @@ const {
   addMealToPlan,
   getMealPlan,
   removeMealFromPlan,
+  getAllMealPlans,
 } = require("../db/meal-plans");
 const e = require("express");
+
+//Get all meal plans created
+mealPlansRouter.get("/", async (req, res, next) => {
+  try {
+    const mealPlans = await getAllMealPlans();
+    res.json(mealPlans);
+  } catch (error) {
+    const mealPlans = await getAllMealPlans();
+    res.json(mealPlans);
+  }
+});
 
 // Get meal plan for a given week
 mealPlansRouter.get("/week/:weekNumber", async (req, res, next) => {
@@ -41,16 +53,10 @@ mealPlansRouter.post("/", async (req, res, next) => {
 // Add a meal to a meal plan
 mealPlansRouter.post("/:mealPlanId", async (req, res, next) => {
   try {
-    if (req.admin) {
-      const mealPlanId = req.params.mealPlanId;
-      const { mealId, ingredients } = req.body;
-      const updatedMealPlan = await addMealToPlan(
-        mealPlanId,
-        mealId,
-        ingredients
-      );
-      res.json(updatedMealPlan);
-    }
+    const mealPlanId = req.params.mealPlanId;
+    const { mealId } = req.body;
+    const updatedMealPlan = await addMealToPlan(mealPlanId, mealId);
+    res.json(updatedMealPlan);
   } catch (e) {
     next(e);
   }
@@ -59,27 +65,21 @@ mealPlansRouter.post("/:mealPlanId", async (req, res, next) => {
 // Get details of a meal plan
 mealPlansRouter.get("/:mealPlanId", async (req, res, next) => {
   try {
-    if (req.admin) {
-      const mealPlanId = req.params.mealPlanId;
-      const mealPlan = await getMealPlan(mealPlanId);
-      res.json(mealPlan);
-    }
+    const mealPlanId = req.params.mealPlanId;
+    const mealPlan = await getMealPlan(mealPlanId);
+    res.json(mealPlan);
   } catch (e) {
     next(e);
   }
 });
 
 // Remove a meal from a meal plan
-mealPlansRouter.delete("/", async (req, res, next) => {
-  const { mealPlanId, mealId } = req.body;
+mealPlansRouter.delete("/:mealPlanId/:mealId", async (req, res, next) => {
+  const { mealPlanId, mealId } = req.params;
   try {
-    if (req.admin) {
-      const updatedMealPlan = await removeMealFromPlan(mealPlanId, mealId);
-      if (updatedMealPlan) res.send(updatedMealPlan);
-      else res.send("error at delete meal from meal-plan");
-    } else {
-      res.sendStatus(401);
-    }
+    const updatedMealPlan = await removeMealFromPlan(mealPlanId, mealId);
+    if (updatedMealPlan) res.send(updatedMealPlan);
+    else res.send("error at delete meal from meal-plan");
   } catch (e) {
     next(e);
   }

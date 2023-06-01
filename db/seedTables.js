@@ -107,17 +107,16 @@ async function createTables() {
       
       CREATE TABLE meal_plans (
         id SERIAL PRIMARY KEY,
-        week_number INTEGER NOT NULL,
-        meal_ids INTEGER[] 
+        week_number INTEGER NOT NULL
+        
       );
     
       CREATE TABLE meal_plan_meals (
         id SERIAL PRIMARY KEY,
-          meal_plan_id INTEGER NOT NULL,
-          meal_id INTEGER NOT NULL,
-          day_of_week VARCHAR(255),
-          FOREIGN KEY (meal_plan_id) REFERENCES meal_plans(id) ON DELETE CASCADE,
-          FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
+        meal_plan_id INTEGER NOT NULL REFERENCES meal_plans(id) ON DELETE CASCADE,
+        meal_id INTEGER NOT NULL REFERENCES meals(id) ON DELETE CASCADE,
+        day_of_week VARCHAR(255),
+        UNIQUE (meal_plan_id, meal_id)
       );
       
       CREATE TABLE meal_plan_ingredients (
