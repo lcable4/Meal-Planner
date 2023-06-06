@@ -10,52 +10,49 @@ const pool = new Pool({
     process.env.NODE_ENV === "production"
       ? { rejectUnauthorized: false }
       : false,
+
+  max: 20,
+  idleTimeoutMillis: 300000,
+  connectionTimeoutMillis: 10000,
 });
 
-class client {
-  //this Client will prevent timeout errors and open connections
-  //keep client private, we don't need to access it directly ever
-  #client;
+class Client {
+  constructor() {
+    this.pool = pool;
+  }
 
   async connect() {
     // use this before you query the db
     try {
-      this.#client = await pool.connect();
+      this.client = await pool.connect();
     } catch (e) {
       throw e;
     }
   }
 
-  async query(
-    sql,
-    params //to query || follows the same syntax as node pg client.connect("QUERY STRING", params)
-  ) {
-    if (!this.#client) {
-      console.error("PLEASE USE OBJECT.connect(); before running query");
-      console.log("Query Will Still Run");
-      await this.connect();
-    }
+  async query(sql, params) {
+    let client;
     try {
-      const result = await this.#client.query(sql, params);
+      client = await this.pool.connect();
+      const result = await client.query(sql, params);
       return result;
     } catch (e) {
       throw e;
+    } finally {
+      if (client) {
+        client.release();
+      }
     }
   }
 
   async release() {
     //release the connection back to the pool
     try {
-      await this.#client.release();
+      await this.client.release();
     } catch (e) {
       throw e;
     }
   }
 }
-/*
-  await client.connect();
-  await client.query();
-  await client.release();
-*/
 
-module.exports = new client();
+module.exports = new Client();

@@ -1,30 +1,29 @@
-const dbClient = require("./index");
-const pool = require("./index");
+const client = require("./index");
 
 // Get all meal plans created
 async function getAllMealPlans() {
   try {
-    await dbClient.connect();
-    const { rows } = await dbClient.query(
-      `
+    await client.connect();
+    const { rows } = await client.query(`
       SELECT *
       FROM meal_plans
-      `
-    );
-    await dbClient.release();
-
+    `);
     return rows;
   } catch (error) {
     console.log(error);
     throw new Error("Error getting all meal plans");
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }
 
 // Get meal plan for the given week
 async function getPlanByWeek(weekNumber) {
   try {
-    await dbClient.connect();
-    const { rows } = await dbClient.query(
+    await client.connect();
+    const { rows } = await client.query(
       `
       SELECT 
         meal_plans.week_number, 
@@ -40,7 +39,7 @@ async function getPlanByWeek(weekNumber) {
       `,
       [weekNumber]
     );
-    await dbClient.release();
+    await client.release();
 
     return rows;
   } catch (e) {
@@ -52,8 +51,8 @@ async function getPlanByWeek(weekNumber) {
 // Get a meal plan by its ID
 async function getMealPlan(mealPlanId) {
   try {
-    await dbClient.connect();
-    const { rows } = await dbClient.query(
+    await client.connect();
+    const { rows } = await client.query(
       `
       SELECT meals.id AS meal_id, meals.name AS meal_name
       FROM meal_plans
@@ -64,7 +63,7 @@ async function getMealPlan(mealPlanId) {
       `,
       [mealPlanId]
     );
-    await dbClient.release();
+    await client.release();
 
     return rows;
   } catch (e) {
@@ -75,8 +74,8 @@ async function getMealPlan(mealPlanId) {
 // Create a new meal plan
 async function createMealPlan(mealPlanId, weekNumber) {
   try {
-    await dbClient.connect();
-    const { rows } = await dbClient.query(
+    await client.connect();
+    const { rows } = await client.query(
       `
         INSERT INTO meal_plans(mealPlanId, week_number )
         VALUES ($1, $2)
@@ -84,7 +83,7 @@ async function createMealPlan(mealPlanId, weekNumber) {
       `,
       [mealPlanId, weekNumber]
     );
-    await dbClient.release();
+    await client.release();
     return rows[0];
   } catch (e) {
     console.error(e);
@@ -94,7 +93,7 @@ async function createMealPlan(mealPlanId, weekNumber) {
 // Add a meal to a plan
 async function addMealToPlan(mealPlanId, mealId) {
   try {
-    await dbClient.connect();
+    await client.connect();
 
     const query = `
       INSERT INTO meal_plan_meals (meal_plan_id, meal_id)
@@ -102,7 +101,7 @@ async function addMealToPlan(mealPlanId, mealId) {
       RETURNING id;
     `;
 
-    const result = await dbClient.query(query, [mealPlanId, mealId]);
+    const result = await client.query(query, [mealPlanId, mealId]);
     const mealPlanMealId = result.rows[0].id;
 
     return mealPlanMealId;
@@ -110,14 +109,14 @@ async function addMealToPlan(mealPlanId, mealId) {
     console.error(e);
     throw new Error("Error adding meal to the plan");
   } finally {
-    await dbClient.release();
+    await client.release();
   }
 }
 
 // Remove a meal from a user's plan
 async function removeMealFromPlan(mealPlanId, mealId) {
   try {
-    await dbClient.connect();
+    await client.connect();
 
     const query = `
       DELETE FROM meal_plan_meals
@@ -127,9 +126,9 @@ async function removeMealFromPlan(mealPlanId, mealId) {
 
     const {
       rows: [deletedMealPlanMeal],
-    } = await dbClient.query(query, [mealPlanId, mealId]);
+    } = await client.query(query, [mealPlanId, mealId]);
 
-    await dbClient.release();
+    await client.release();
 
     return deletedMealPlanMeal;
   } catch (e) {

@@ -17,9 +17,13 @@ mealsRouter.get("/:id", async (req, res) => {
 
 // Get /api/meals
 mealsRouter.get("/", async (req, res) => {
-  const result = await getAllMeals();
-  console.log(result, "result");
-  res.send(result);
+  try {
+    const meals = await getAllMeals();
+    res.json(meals);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error getting meals" });
+  }
 });
 
 //Post /api/meals
@@ -48,7 +52,7 @@ mealsRouter.post("/", async (req, res, next) => {
 mealsRouter.patch("/:mealId", async (req, res, next) => {
   const mealId = req.body.mealId;
   const fields = req.body;
-  console.log(mealId);
+
   try {
     if (req.admin) {
       const meal = await updateMeal({ mealId, ...fields });
@@ -69,7 +73,6 @@ mealsRouter.delete("/:mealId", async (req, res, next) => {
     if (req.admin) {
       const { id } = req.params;
       const routine = await getMealById(mealId);
-      console.log(routine, "id log");
       const deletedMeal = await deleteMeal(mealId);
       res.send(deletedMeal);
     } else {

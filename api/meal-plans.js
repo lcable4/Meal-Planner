@@ -16,8 +16,8 @@ mealPlansRouter.get("/", async (req, res, next) => {
     const mealPlans = await getAllMealPlans();
     res.json(mealPlans);
   } catch (error) {
-    const mealPlans = await getAllMealPlans();
-    res.json(mealPlans);
+    console.log(error);
+    res.status(500).json({ error: "Error getting meal plans" });
   }
 });
 
